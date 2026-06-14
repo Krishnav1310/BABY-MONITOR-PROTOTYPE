@@ -22,6 +22,22 @@ class MotionDetector:
         self.SIGNIFICANT_MOTION_THRESHOLD = 2000 
         self.LIGHTING_CHANGE_THRESHOLD = 15000 
 
+        # Framework parameters/settings
+        self.apnea_alert_time = 20
+        self.stillness_warning_time = 12
+        self.slow_breathing_rate = 30
+
+    def update_thresholds(self, settings):
+        """Update sensitivity and timing thresholds dynamically"""
+        self.MOVEMENT_PIXEL_THRESHOLD = int(settings.get("movementPixelThreshold", self.MOVEMENT_PIXEL_THRESHOLD))
+        self.MIN_MOTION_AREA = int(settings.get("minMotionArea", self.MIN_MOTION_AREA))
+        self.SIGNIFICANT_MOTION_THRESHOLD = int(settings.get("significantMotionThreshold", self.SIGNIFICANT_MOTION_THRESHOLD))
+        
+        self.apnea_alert_time = int(settings.get("apneaAlertTime", self.apnea_alert_time))
+        self.stillness_warning_time = int(settings.get("stillnessWarningTime", self.stillness_warning_time))
+        self.slow_breathing_rate = int(settings.get("slowBreathingRate", self.slow_breathing_rate))
+        print(f"INFO: MotionDetector thresholds updated: PIXELS={self.MOVEMENT_PIXEL_THRESHOLD}, AREA={self.MIN_MOTION_AREA}, SIGNIFICANT={self.SIGNIFICANT_MOTION_THRESHOLD}, APNEA={self.apnea_alert_time}s, WARNING={self.stillness_warning_time}s, SLOW_RATE={self.slow_breathing_rate}")
+
     def process_frame(self, image_bytes):
         try:
             nparr = np.frombuffer(image_bytes, np.uint8)
@@ -67,11 +83,11 @@ class MotionDetector:
             still_time = int(time.time() - self.last_movement_time)
             
             # Clinical Status Logic
-            if still_time >= 20:
+            if still_time >= self.apnea_alert_time:
                 status = "UNSAFE"
             elif self.breathing_status != "NORMAL":
                 status = "WARNING"
-            elif still_time > 12:
+            elif still_time > self.stillness_warning_time:
                 status = "STILL"
             else:
                 status = "SAFE"
@@ -102,7 +118,7 @@ class MotionDetector:
         self.avg_intensity = np.mean(peak_amplitudes) if peak_amplitudes else 0
         
         # Comprehensive Logic for slow or small breathing
-        if self.breathing_rate > 0 and self.breathing_rate < 30:
+        if self.breathing_rate > 0 and self.breathing_rate < self.slow_breathing_rate:
             self.breathing_status = "SLOW" # Bradypnea
         elif self.breathing_rate > 0 and self.avg_intensity < 200:
             self.breathing_status = "SHALLOW" # Weak signal
@@ -112,11 +128,11 @@ class MotionDetector:
     def get_still_status(self):
         still_time = int(time.time() - self.last_movement_time)
         
-        if still_time >= 20:
+        if still_time >= self.apnea_alert_time:
             status = "UNSAFE"
         elif self.breathing_status != "NORMAL":
             status = "WARNING"
-        elif still_time > 12:
+        elif still_time > self.stillness_warning_time:
             status = "STILL"
         else:
             status = "SAFE"
@@ -125,7 +141,7 @@ class MotionDetector:
             "stillTime": still_time,
             "status": status,
             "breathingStatus": self.breathing_status,
-            "confidence": 98 if still_time < 12 else (70 if still_time < 20 else 30),
+            "confidence": 98 if still_time < self.stillness_warning_time else (70 if still_time < self.apnea_alert_time else 30),
             "alertActive": status == "UNSAFE" or status == "WARNING"
         }
 
@@ -136,6 +152,6 @@ class MotionDetector:
             "status": status,
             "breathingRate": self.breathing_rate if status == "SAFE" or status == "WARNING" else 0,
             "breathingStatus": self.breathing_status,
-            "confidence": 98 if still_time < 12 else (70 if still_time < 20 else 30),
+            "confidence": 98 if still_time < self.stillness_warning_time else (70 if still_time < self.apnea_alert_time else 30),
             "mode": "SINGLE-BABY-BREATHING-CORE"
         }

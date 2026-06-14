@@ -256,3 +256,442 @@ input:checked+.slider:before {
     box-shadow: 0 0 15px rgba(255, 133, 161, 0.3);
   }
 }
+
+/* Google Meet Style Ward Overview Grid */
+.meet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  flex: 1;
+}
+
+@media (min-width: 1200px) {
+  .meet-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.meet-tile {
+  position: relative;
+  background: #1E293B; /* Dark modern tile like Google Meet */
+  border: 2px solid transparent;
+  border-radius: 24px;
+  height: 240px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.meet-tile:hover {
+  transform: scale(1.02);
+  border-color: var(--primary);
+  box-shadow: 0 15px 35px rgba(93, 183, 255, 0.2);
+}
+
+/* Selected active baby tile */
+.meet-tile.active-focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(93, 183, 255, 0.4);
+}
+
+/* Emergency critical pulse */
+.meet-tile.critical-pulse {
+  border-color: var(--secondary);
+  animation: tileCriticalPulse 1s infinite alternate;
+}
+
+@keyframes tileCriticalPulse {
+  from {
+    box-shadow: 0 0 10px rgba(255, 133, 161, 0.2);
+  }
+  to {
+    box-shadow: 0 0 25px rgba(255, 133, 161, 0.8);
+    background-color: #31161C;
+  }
+}
+
+/* Warning pulse */
+.meet-tile.warning-pulse {
+  border-color: var(--accent);
+  animation: tileWarningPulse 1.2s infinite alternate;
+}
+
+@keyframes tileWarningPulse {
+  from {
+    box-shadow: 0 0 8px rgba(255, 210, 63, 0.2);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(255, 210, 63, 0.6);
+    background-color: #2D2412;
+  }
+}
+
+.meet-avatar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.meet-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  background: linear-gradient(135deg, var(--primary), var(--lavender));
+}
+
+.meet-vitals-overlay {
+  display: flex;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  border-radius: 16px;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+
+.meet-vital-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #E2E8F0;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.meet-bottom-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  padding: 8px 16px;
+  border-radius: 14px;
+  width: 100%;
+}
+
+.meet-name {
+  color: white;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.meet-status-badge {
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.meet-status-badge.safe {
+  background: rgba(77, 222, 186, 0.2);
+  color: var(--mint);
+}
+
+.meet-status-badge.warning {
+  background: rgba(255, 210, 63, 0.2);
+  color: var(--accent);
+}
+
+.meet-status-badge.danger {
+  background: rgba(255, 133, 161, 0.2);
+  color: var(--secondary);
+}
+
+.meet-status-badge.offline {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94A3B8;
+}
+
+/* Settings sliders and fields */
+.settings-group {
+  margin-bottom: 24px;
+}
+
+.settings-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.settings-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #E2E8F0;
+  outline: none;
+  transition: background 0.3s;
+}
+
+.settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(93, 183, 255, 0.4);
+  transition: transform 0.2s;
+}
+
+.settings-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.settings-value {
+  color: var(--primary);
+  font-weight: 900;
+}
+
+/* Glassmorphism Redesign Elements */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.05);
+  border-radius: 32px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.1);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* Numeric Keypad for Clinical Authentication */
+.pin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 280px;
+  margin: 30px auto 0;
+}
+
+.pin-btn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(5px);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-main);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.pin-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: scale(1.08);
+  box-shadow: 0 8px 20px var(--glow);
+}
+
+.pin-btn:active {
+  transform: scale(0.95);
+}
+
+.passcode-dots-container {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.passcode-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.passcode-dot.filled {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 10px var(--primary);
+  transform: scale(1.2);
+}
+
+/* Heart Rate Pulse Micro-animation */
+.heartbeat-icon {
+  animation: heartPulse 0.8s infinite alternate cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes heartPulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 2px rgba(255, 133, 161, 0.4));
+  }
+  100% {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 8px rgba(255, 133, 161, 0.8));
+  }
+}
+
+/* Live Sensitivity Gauge in Settings */
+.live-gauge-track {
+  width: 100%;
+  height: 24px;
+  background: #E2E8F0;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.live-gauge-bar {
+  height: 100%;
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--mint), var(--primary));
+  transition: width 0.1s ease-out;
+  box-shadow: 0 2px 5px rgba(93, 183, 255, 0.3);
+}
+
+.live-gauge-bar.over-threshold {
+  background: linear-gradient(90deg, var(--mint), var(--primary), var(--secondary));
+}
+
+.live-gauge-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #DC2626;
+  box-shadow: 0 0 8px #DC2626;
+  z-index: 10;
+}
+
+.live-gauge-marker-label {
+  position: absolute;
+  top: -20px;
+  font-size: 9px;
+  font-weight: 900;
+  color: #DC2626;
+  transform: translateX(-50%);
+}
+
+/* Interactive simulation control floating panel */
+.sim-controller-card {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 320px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  border-radius: 24px;
+  color: white;
+  z-index: 999;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.sim-controller-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.sim-controller-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sim-btn {
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.sim-btn.normal {
+  background: rgba(77, 222, 186, 0.1);
+  color: var(--mint);
+  border-color: rgba(77, 222, 186, 0.2);
+}
+
+.sim-btn.normal:hover {
+  background: var(--mint);
+  color: #0F172A;
+}
+
+.sim-btn.warning {
+  background: rgba(255, 210, 63, 0.1);
+  color: var(--accent);
+  border-color: rgba(255, 210, 63, 0.2);
+}
+
+.sim-btn.warning:hover {
+  background: var(--accent);
+  color: #0F172A;
+}
+
+.sim-btn.danger {
+  background: rgba(255, 133, 161, 0.1);
+  color: var(--secondary);
+  border-color: rgba(255, 133, 161, 0.2);
+}
+
+.sim-btn.danger:hover {
+  background: var(--secondary);
+  color: white;
+}
+
+.sim-btn.off {
+  background: rgba(148, 163, 184, 0.1);
+  color: #CBD5E1;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.sim-btn.off:hover {
+  background: #CBD5E1;
+  color: #0F172A;
+}
+
+.sim-btn.active {
+  box-shadow: 0 0 12px currentColor;
+  transform: scale(1.02);
+}
