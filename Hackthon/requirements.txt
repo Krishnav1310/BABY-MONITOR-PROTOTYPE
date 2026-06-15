@@ -6,4 +6,4 @@ python-multipart
 tensorflow
 tensorflow-hub
 sounddevice
-pyaudio
+
