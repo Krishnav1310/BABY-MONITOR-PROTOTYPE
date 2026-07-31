@@ -1,0 +1,51 @@
+{
+    "babies": [
+        {
+            "baby_id": "BABY_001",
+            "status": "NORMAL",
+            "prediction_score": 92,
+            "vitals": {
+                "heart_rate_bpm": 140.0,
+                "oxygen_saturation": 97.0,
+                "temperature_c": 36.8,
+                "respiratory_rate_bpm": 40.0
+            },
+            "reasons": [],
+            "timestamp": 1785233739.9371853
+        },
+        {
+            "baby_id": "BABY_002",
+            "status": "NORMAL",
+            "prediction_score": 61,
+            "vitals": {
+                "heart_rate_bpm": 170.0,
+                "oxygen_saturation": 93.0,
+                "temperature_c": 37.5,
+                "respiratory_rate_bpm": 55.0
+            },
+            "reasons": [],
+            "timestamp": 1785233740.0021808
+        },
+        {
+            "baby_id": "BABY_003",
+            "status": "MODERATE",
+            "prediction_score": 71,
+            "vitals": {
+                "heart_rate_bpm": 190.0,
+                "oxygen_saturation": 85.0,
+                "temperature_c": 38.2,
+                "respiratory_rate_bpm": 65.0
+            },
+            "reasons": [
+                "Heart Rate: 190.0 bpm ⬆️",
+                "SpO₂: 85.0% ⬇️",
+                "Temperature: 38.2°C ⬆️",
+                "Respiratory Rate: 65.0/min ⬆️",
+                "APGAR Score: 5.0 ⬇️",
+                "Weight: 2.0 kg ⬇️",
+                "Reflexes: Abnormal ⬇️"
+            ],
+            "timestamp": 1785233740.0673983
+        }
+    ]
+}

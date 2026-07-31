@@ -1,9 +1,9 @@
 fastapi
 uvicorn
-opencv-python-headless
+pandas
 numpy
-python-multipart
-tensorflow
-tensorflow-hub
+scikit-learn
+joblib
+pydantic
+opencv-python-headless
 sounddevice
-

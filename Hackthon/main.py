@@ -1,309 +1,677 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from shared_data import dashboard_data, update_dynamic_vitals, add_log
+from pydantic import BaseModel
+import joblib
+import pandas as pd
 import threading
 import time
-import asyncio
-from contextlib import asynccontextmanager
+import json
 
-# Import AI Models
-try:
-    from motion_detection import MotionDetector
-except ImportError as e:
-    print(f"Error importing MotionDetector: {e}")
-    MotionDetector = None
 
-try:
-    from cry_detection_yamnet import CryDetector
-except ImportError as e:
-    print(f"Error importing CryDetector: {e}")
-    CryDetector = None
+# ============================================================
+# LOAD AI MODEL
+# ============================================================
 
-# Global instances
-motion_detector = None
-cry_detector = None
-camera_enabled = True # Track camera status on backend
+MODEL_PATH = "model.pkl"
+SCALER_PATH = "scaler.pkl"
+LABEL_PATH = "high_risk_label.pkl"
 
-# Background thread for Cry Detection
-def run_cry_detection():
-    global cry_detector
-    if not CryDetector:
-        print("CryDetector not found. Skipping.")
-        return
+model = joblib.load(MODEL_PATH)
+scaler = joblib.load(SCALER_PATH)
+label_encoder = joblib.load(LABEL_PATH)
 
-    print("Starting Bio-Acoustic Monitoring...")
-    if cry_detector is None:
-        cry_detector = CryDetector()
-    
-    while True:
-        try:
-            # If camera is disabled, stop detection and alerts
-            if not camera_enabled:
-                dashboard_data["cryDetection"].update({
-                    "status": "normal",
-                    "cryType": "Disabled",
-                    "confidence": 0,
-                    "intensity": 0,
-                    "duration": 0,
-                    "lastDetected": "Camera Off"
-                })
-                time.sleep(1)
-                continue
 
-            # Perform detection (audio sampling)
-            result = cry_detector.detect()
-            
-            # Update shared data
-            dashboard_data["cryDetection"].update({
-                "status": "distress" if result["isCrying"] else "normal",
-                "cryType": result["cryType"].capitalize(),
-                "confidence": result["confidence"],
-                "intensity": int(result["confidence"] * 0.8) if result["isCrying"] else 0,
-                "duration": result["silentTime"],
-                "lastDetected": f"{result['silentTime']}s ago" if not result['isCrying'] else "Now"
-            })
-            
-            if result["isCrying"]:
-                add_alert("warning", f"Cry detected: {result['cryType']}")
-            
-            # Also update dynamic patient vitals in this loop
-            update_dynamic_vitals()
-                
-        except Exception as e:
-            print(f"Cry Loop Error: {e}")
-            time.sleep(1)
+# ============================================================
+# EXACT FEATURE ORDER
+# ============================================================
 
-def add_alert(level, message):
-    # Only add alerts if camera/monitoring is enabled
-    if not camera_enabled:
-        return
-        
-    # Prevent duplicate alerts for the same event
-    for alert in dashboard_data["alerts"]:
-        if alert["message"] == message and (alert["timestamp"] == "Just now" or "Simulation" in alert["message"]):
-            return
-            
-    # Use our unified logger
-    add_log(level, message)
+FEATURES = [
+    "gender",
+    "weight_kg",
+    "temperature_c",
+    "heart_rate_bpm",
+    "respiratory_rate_bpm",
+    "oxygen_saturation",
+    "apgar_score",
+    "immunizations_done",
+    "reflexes_normal"
+]
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global motion_detector, cry_detector
-    # Initialize detectors early
-    if MotionDetector:
-        motion_detector = MotionDetector()
-        motion_detector.update_thresholds(dashboard_data["settings"])
-    if CryDetector:
-        cry_detector = CryDetector()
-        
-    # Start the Audio AI Monitoring thread
-    t2 = threading.Thread(target=run_cry_detection, daemon=True)
-    t2.start()
-    yield
 
-app = FastAPI(lifespan=lifespan)
+# ============================================================
+# FASTAPI APPLICATION
+# ============================================================
+
+app = FastAPI(
+    title="Neonatal AI PC2 Server",
+    description="PC2 AI server for multi-baby neonatal monitoring",
+    version="2.0"
+)
+
+
+# ============================================================
+# CORS
+# Allows PC3 browser dashboard to access PC2 API
+# ============================================================
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/api/dashboard")
-def get_dashboard():
-    # Update stillness time only if camera is enabled and active baby is live
-    if motion_detector:
-        # Check if the active baby is the live camera source
-        active_id = dashboard_data["activeBabyId"]
-        is_live = False
-        simulation_mode = "off"
-        for b in dashboard_data["babies"]:
-            if b["id"] == active_id:
-                is_live = b["isLiveSource"]
-                simulation_mode = b["simulationMode"]
-                break
 
-        if camera_enabled and is_live and simulation_mode == "off":
-            still_data = motion_detector.get_still_status()
-            dashboard_data["motionMonitoring"].update(still_data)
-            
-            if still_data["status"] == "UNSAFE":
-                add_alert("critical", "Prolonged stillness detected!")
-            elif still_data["breathingStatus"] == "SLOW":
-                add_alert("warning", "Slow breathing detected (Bradypnea)!")
-            elif still_data["breathingStatus"] == "SHALLOW":
-                add_alert("warning", "Shallow breathing pattern detected!")
-        elif not camera_enabled:
-            # If camera is disabled, force safe/reset state
-            dashboard_data["motionMonitoring"].update({
-                "status": "SAFE",
-                "stillTime": 0,
-                "motion": 0,
-                "breathingRate": 0,
-                "breathingStatus": "NORMAL",
-                "alertActive": False
-            })
+# ============================================================
+# LATEST PREDICTIONS
+# ============================================================
 
-    # Run the vitals simulation for all babies and update active baby root keys
-    update_dynamic_vitals()
-            
-    return dashboard_data
+latest_predictions = {}
 
-@app.post("/api/select_baby")
-async def select_baby(payload: dict):
-    global motion_detector
-    baby_id = payload.get("id")
-    if baby_id:
-        for b in dashboard_data["babies"]:
-            if b["id"] == baby_id:
-                dashboard_data["activeBabyId"] = baby_id
-                # Reset stillness timer on backend if baby is switched
-                if motion_detector:
-                    motion_detector.last_movement_time = time.time()
-                # Update vitals immediately to apply selection
-                update_dynamic_vitals()
-                return {"status": "success", "activeBabyId": baby_id}
-    return {"status": "error", "message": f"Baby ID {baby_id} not found"}
+prediction_lock = threading.RLock()
 
-@app.post("/api/settings")
-async def update_settings(payload: dict):
-    global motion_detector
-    dashboard_data["settings"].update(payload)
-    if motion_detector:
-        motion_detector.update_thresholds(dashboard_data["settings"])
-    return {"status": "success", "settings": dashboard_data["settings"]}
+JSON_FILE = "latest_predictions.json"
 
-@app.post("/api/simulate")
-async def simulate_baby_state(payload: dict):
-    baby_id = payload.get("id")
-    mode = payload.get("mode") # "off", "apnea", "crying", "normal"
-    if baby_id:
-        for b in dashboard_data["babies"]:
-            if b["id"] == baby_id:
-                b["simulationMode"] = mode
-                
-                # Setup quick mock state changes
-                if mode == "apnea":
-                    b["stillTime"] = int(dashboard_data["settings"]["apneaAlertTime"])
-                    b["status"] = "UNSAFE"
-                    b["vitals"]["respRate"] = 0
-                    b["vitals"]["heartRate"] = 92
-                    b["vitals"]["spo2"] = 89
-                    add_log("critical", f"Simulation override: APNEA triggered for {b['name']}.")
-                elif mode == "crying":
-                    b["stillTime"] = 0
-                    b["status"] = "SAFE"
-                    b["vitals"]["respRate"] = 54
-                    b["vitals"]["heartRate"] = 152
-                    b["vitals"]["spo2"] = 98
-                    add_log("warning", f"Simulation override: DISTRESS CRY triggered for {b['name']}.")
-                elif mode == "normal":
-                    b["stillTime"] = 0
-                    b["status"] = "SAFE"
-                    b["vitals"]["respRate"] = 44
-                    b["vitals"]["heartRate"] = 140
-                    b["vitals"]["spo2"] = 98
-                    add_log("info", f"Simulation override: NORMAL vitals enforced for {b['name']}.")
-                else: # "off"
-                    b["stillTime"] = 0
-                    b["status"] = "SAFE"
-                    add_log("info", f"Simulation overrides disabled for {b['name']}.")
-                
-                update_dynamic_vitals()
-                return {"status": "success", "baby": b}
-    return {"status": "error", "message": f"Baby ID {baby_id} not found"}
 
-@app.post("/api/camera_status")
-async def update_camera_status(status: dict):
-    global camera_enabled
-    camera_enabled = status.get("enabled", True)
-    
-    if not camera_enabled:
-        # Reset movement timer on backend immediately when camera is turned off
-        if motion_detector:
-            motion_detector.last_movement_time = time.time()
-            
-        # Immediately reset dashboard states when camera is disabled
-        dashboard_data["motionMonitoring"].update({
-            "status": "SAFE",
-            "stillTime": 0,
-            "motion": 0,
-            "breathingRate": 0,
-            "breathingStatus": "NORMAL",
-            "alertActive": False
-        })
-        
-        dashboard_data["cryDetection"].update({
-            "status": "normal",
-            "cryType": "Monitoring Paused",
-            "intensity": 0,
-            "duration": 0,
-            "confidence": 0,
-            "lastDetected": "None"
-        })
-        
-        # Clear active alerts when camera is disabled (stops the alarm)
-        dashboard_data["alerts"] = [] 
-        
-    return {"status": "updated", "camera_enabled": camera_enabled}
+# ============================================================
+# INPUT MODEL - ONE BABY
+# ============================================================
 
-@app.post("/api/process_frame")
-async def process_frame(file: UploadFile = File(...)):
-    global motion_detector
-    if motion_detector is None:
-        motion_detector = MotionDetector()
-        motion_detector.update_thresholds(dashboard_data["settings"])
-    
-    # If camera is disabled, skip processing
-    if not camera_enabled:
-        return {"status": "skipped", "reason": "camera_disabled"}
+class BabyData(BaseModel):
 
-    # Also verify if the selected baby is the live source
-    active_id = dashboard_data["activeBabyId"]
-    is_live = False
-    simulation_mode = "off"
-    for b in dashboard_data["babies"]:
-        if b["id"] == active_id:
-            is_live = b["isLiveSource"]
-            simulation_mode = b["simulationMode"]
-            break
-            
-    if not is_live or simulation_mode != "off":
-        return {"status": "skipped", "reason": "active_baby_not_live_or_simulated"}
+    baby_id: str
 
-    contents = await file.read()
-    data = motion_detector.process_frame(contents)
-    
-    if data:
-        dashboard_data["motionMonitoring"].update({
-            "status": data["status"],
-            "stillTime": data["stillTime"],
-            "motion": data["motion"],
-            "breathingRate": data.get("breathingRate", 0),
-            "breathingStatus": data.get("breathingStatus", "NORMAL"),
-            "confidence": data["confidence"],
-            "alertActive": data["status"] in ["UNSAFE", "WARNING"]
-        })
-        
-        if data["status"] == "UNSAFE":
-            add_alert("critical", "Prolonged stillness detected!")
-        elif data.get("breathingStatus") == "SLOW":
-            add_alert("warning", "Bradypnea (Slow Breathing)!")
-        elif data.get("breathingStatus") == "SHALLOW":
-            add_alert("warning", "Shallow Breathing Monitoring!")
-            
-        # Update details in the ward list
-        update_dynamic_vitals()
-            
-    return {"status": "processed"}
+    gender: int
+    weight_kg: float
+    temperature_c: float
+    heart_rate_bpm: float
+    respiratory_rate_bpm: float
+    oxygen_saturation: float
+    apgar_score: float
+    immunizations_done: int
+    reflexes_normal: int
+
+
+# ============================================================
+# INPUT MODEL - MULTIPLE BABIES
+# ============================================================
+
+class MultipleBabiesData(BaseModel):
+
+    babies: list[BabyData]
+
+
+# ============================================================
+# SAVE ALL PREDICTIONS TO JSON
+# ============================================================
+
+def save_predictions_to_json():
+
+    with prediction_lock:
+
+        data = {
+            "babies": list(
+                latest_predictions.values()
+            )
+        }
+
+        with open(
+            JSON_FILE,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                data,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+
+# ============================================================
+# REASON ENGINE
+# ============================================================
+
+def get_vital_reasons(baby):
+
+    reasons = []
+
+    # --------------------------------------------------------
+    # HEART RATE
+    # --------------------------------------------------------
+
+    if baby["heart_rate_bpm"] > 160:
+
+        reasons.append(
+            f"Heart Rate: {baby['heart_rate_bpm']} bpm ⬆️"
+        )
+
+    elif baby["heart_rate_bpm"] < 120:
+
+        reasons.append(
+            f"Heart Rate: {baby['heart_rate_bpm']} bpm ⬇️"
+        )
+
+
+    # --------------------------------------------------------
+    # SpO2
+    # --------------------------------------------------------
+
+    if baby["oxygen_saturation"] < 95:
+
+        reasons.append(
+            f"SpO₂: {baby['oxygen_saturation']}% ⬇️"
+        )
+
+
+    # --------------------------------------------------------
+    # TEMPERATURE
+    # --------------------------------------------------------
+
+    if baby["temperature_c"] > 37.5:
+
+        reasons.append(
+            f"Temperature: {baby['temperature_c']}°C ⬆️"
+        )
+
+    elif baby["temperature_c"] < 36.5:
+
+        reasons.append(
+            f"Temperature: {baby['temperature_c']}°C ⬇️"
+        )
+
+
+    # --------------------------------------------------------
+    # RESPIRATORY RATE
+    # --------------------------------------------------------
+
+    if baby["respiratory_rate_bpm"] > 50:
+
+        reasons.append(
+            f"Respiratory Rate: "
+            f"{baby['respiratory_rate_bpm']}/min ⬆️"
+        )
+
+    elif baby["respiratory_rate_bpm"] < 30:
+
+        reasons.append(
+            f"Respiratory Rate: "
+            f"{baby['respiratory_rate_bpm']}/min ⬇️"
+        )
+
+
+    # --------------------------------------------------------
+    # APGAR
+    # --------------------------------------------------------
+
+    if baby["apgar_score"] < 7:
+
+        reasons.append(
+            f"APGAR Score: {baby['apgar_score']} ⬇️"
+        )
+
+
+    # --------------------------------------------------------
+    # WEIGHT
+    # --------------------------------------------------------
+
+    if baby["weight_kg"] < 2.5:
+
+        reasons.append(
+            f"Weight: {baby['weight_kg']} kg ⬇️"
+        )
+
+
+    # --------------------------------------------------------
+    # REFLEXES
+    # --------------------------------------------------------
+
+    if baby["reflexes_normal"] == 0:
+
+        reasons.append(
+            "Reflexes: Abnormal ⬇️"
+        )
+
+
+    return reasons
+
+
+# ============================================================
+# PROCESS ONE BABY
+# ============================================================
+
+def process_one_baby(baby: BabyData):
+
+    # --------------------------------------------------------
+    # CONVERT TO DICTIONARY
+    # --------------------------------------------------------
+
+    baby_dict = baby.model_dump()
+
+
+    # --------------------------------------------------------
+    # CREATE MODEL INPUT
+    # --------------------------------------------------------
+
+    input_data = pd.DataFrame([
+        {
+            feature: baby_dict[feature]
+            for feature in FEATURES
+        }
+    ])
+
+    input_data = input_data[FEATURES]
+
+
+    # --------------------------------------------------------
+    # SCALE
+    # --------------------------------------------------------
+
+    scaled_data = scaler.transform(
+        input_data
+    )
+
+
+    # --------------------------------------------------------
+    # AI PREDICTION
+    # --------------------------------------------------------
+
+    prediction_number = model.predict(
+        scaled_data
+    )[0]
+
+
+    # --------------------------------------------------------
+    # MODEL PROBABILITIES
+    # --------------------------------------------------------
+
+    probabilities = model.predict_proba(
+        scaled_data
+    )[0]
+
+
+    # --------------------------------------------------------
+    # CONVERT NUMBER → STATUS
+    # --------------------------------------------------------
+
+    status = label_encoder.inverse_transform(
+        [prediction_number]
+    )[0]
+
+
+    # --------------------------------------------------------
+    # PREDICTION SCORE
+    # --------------------------------------------------------
+
+    class_index = list(
+        model.classes_
+    ).index(
+        prediction_number
+    )
+
+    prediction_score = round(
+        probabilities[class_index] * 100
+    )
+
+
+    # --------------------------------------------------------
+    # GENERATE REASONS
+    # ONLY MODERATE / CRITICAL
+    # --------------------------------------------------------
+
+    reasons = []
+
+    if status in [
+        "MODERATE",
+        "CRITICAL"
+    ]:
+
+        reasons = get_vital_reasons(
+            baby_dict
+        )
+
+
+    # --------------------------------------------------------
+    # RESULT
+    # --------------------------------------------------------
+
+    result = {
+
+        "baby_id": baby.baby_id,
+
+        "status": status,
+
+        "prediction_score": prediction_score,
+
+        "vitals": {
+
+            "heart_rate_bpm":
+                baby.heart_rate_bpm,
+
+            "oxygen_saturation":
+                baby.oxygen_saturation,
+
+            "temperature_c":
+                baby.temperature_c,
+
+            "respiratory_rate_bpm":
+                baby.respiratory_rate_bpm
+
+        },
+
+        "reasons": reasons,
+
+        "timestamp": time.time()
+    }
+
+
+    return result
+
+
+# ============================================================
+# HOME
+# ============================================================
 
 @app.get("/")
-def read_root():
-    return {"status": "System Online"}
+def home():
 
-if __name__ == "__main__":
-    import uvicorn
-    import os
-    port = int(os.environ.get("PORT", 5001))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    return {
+
+        "message":
+            "Neonatal AI PC2 Server is running",
+
+        "status":
+            "online",
+
+        "architecture":
+            "PC1 → PC2 AI → PC3",
+
+        "model":
+            "Random Forest",
+
+        "multi_baby":
+            True
+    }
+
+
+# ============================================================
+# HEALTH CHECK
+# ============================================================
+
+@app.get("/health")
+def health():
+
+    return {
+
+        "status":
+            "healthy",
+
+        "model_loaded":
+            True,
+
+        "model_classes":
+            label_encoder.classes_.tolist(),
+
+        "features":
+            len(FEATURES),
+
+        "trees":
+            len(model.estimators_)
+
+    }
+
+
+# ============================================================
+# PC1 → PC2
+# SINGLE BABY PREDICTION
+# ============================================================
+
+@app.post("/predict")
+def predict(baby: BabyData):
+
+    try:
+
+        result = process_one_baby(
+            baby
+        )
+
+
+        # ----------------------------------------------------
+        # SAVE LATEST RESULT
+        # ----------------------------------------------------
+
+        with prediction_lock:
+
+            latest_predictions[
+                baby.baby_id
+            ] = result
+
+
+        # ----------------------------------------------------
+        # UPDATE JSON FILE
+        # ----------------------------------------------------
+
+        save_predictions_to_json()
+
+
+        return result
+
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+
+# ============================================================
+# PC1 → PC2
+# MULTIPLE BABY PREDICTION
+# ============================================================
+
+@app.post("/predict-batch")
+def predict_batch(
+    data: MultipleBabiesData
+):
+
+    try:
+
+        # ----------------------------------------------------
+        # CHECK EMPTY REQUEST
+        # ----------------------------------------------------
+
+        if not data.babies:
+
+            raise HTTPException(
+                status_code=400,
+                detail="No babies received"
+            )
+
+
+        results = []
+
+
+        # ----------------------------------------------------
+        # PROCESS EVERY BABY
+        # ----------------------------------------------------
+
+        for baby in data.babies:
+
+            result = process_one_baby(
+                baby
+            )
+
+            results.append(
+                result
+            )
+
+
+            # -----------------------------------------------
+            # STORE LATEST RESULT FOR THIS BABY
+            # -----------------------------------------------
+
+            with prediction_lock:
+
+                latest_predictions[
+                    baby.baby_id
+                ] = result
+
+
+        # ----------------------------------------------------
+        # SAVE ALL RESULTS
+        # ----------------------------------------------------
+
+        save_predictions_to_json()
+
+
+        # ----------------------------------------------------
+        # RETURN ALL PREDICTIONS
+        # ----------------------------------------------------
+
+        return {
+
+            "success": True,
+
+            "number_of_babies":
+                len(results),
+
+            "babies":
+                results,
+
+            "timestamp":
+                time.time()
+
+        }
+
+
+    except HTTPException:
+
+        raise
+
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+
+# ============================================================
+# PC3 → PC2
+# GET ALL LATEST PREDICTIONS
+# ============================================================
+
+@app.get("/latest")
+def get_latest():
+
+    with prediction_lock:
+
+        return {
+
+            "success":
+                True,
+
+            "number_of_babies":
+                len(latest_predictions),
+
+            "babies":
+                list(
+                    latest_predictions.values()
+                )
+
+        }
+
+
+# ============================================================
+# PC3 → PC2
+# GET ONE BABY
+# ============================================================
+
+@app.get("/latest/{baby_id}")
+def get_baby_prediction(
+    baby_id: str
+):
+
+    with prediction_lock:
+
+        if baby_id not in latest_predictions:
+
+            raise HTTPException(
+                status_code=404,
+                detail="Baby not found"
+            )
+
+
+        return {
+
+            "success":
+                True,
+
+            "baby":
+                latest_predictions[
+                    baby_id
+                ]
+
+        }
+
+
+# ============================================================
+# STARTUP MESSAGE
+# ============================================================
+
+print()
+
+print(
+    "=============================================="
+)
+
+print(
+    "       NEONATAL AI PC2 SERVER"
+)
+
+print(
+    "=============================================="
+)
+
+print(
+    "Model classes:",
+    model.classes_
+)
+
+print(
+    "Number of features:",
+    model.n_features_in_
+)
+
+print(
+    "Number of trees:",
+    len(model.estimators_)
+)
+
+print(
+    "Label classes:",
+    label_encoder.classes_
+)
+
+print(
+    "Multi-baby endpoint:",
+    "/predict-batch"
+)
+
+print(
+    "PC3 endpoint:",
+    "/latest"
+)
+
+print(
+    "CORS:",
+    "ENABLED"
+)
+
+print(
+    "=============================================="
+)
