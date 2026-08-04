@@ -618,7 +618,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'Dashboard' | 'All Babies' | 'Alerts' | 'Trends' | 'Settings' | 'About'>('Dashboard');
+  const [activeTab, setActiveTab] = useState<'Beds Overview' | 'Focused Telemetry' | 'Alerts' | 'Trends' | 'Settings' | 'About'>('Beds Overview');
   const [isMasterMuted, setIsMasterMuted] = useState<boolean>(false);
   const [selectedBabyId, setSelectedBabyId] = useState<string>('NB-2026-001');
   const [expandedBabyId, setExpandedBabyId] = useState<string | null>(null);
@@ -730,7 +730,7 @@ function App() {
 
   const handleSelectBaby = (babyId: string) => {
     setSelectedBabyId(babyId);
-    setExpandedBabyId(babyId); // Open full telemetry detail modal
+    setActiveTab('Focused Telemetry'); // Switch tab to telemetry view!
   };
 
   // Dynamic style injection
@@ -1216,11 +1216,11 @@ function App() {
           </div>
 
           <nav style={{ flex: 1 }}>
-            <div className={`sidebar-item ${activeTab === 'Dashboard' ? 'active' : ''}`} onClick={() => { setActiveTab('Dashboard'); setIsSidebarOpen(false); }}>
-              <LayoutGrid size={16} /> Dashboard
+            <div className={`sidebar-item ${activeTab === 'Beds Overview' ? 'active' : ''}`} onClick={() => { setActiveTab('Beds Overview'); setIsSidebarOpen(false); }}>
+              <LayoutGrid size={16} /> Beds Overview
             </div>
-            <div className={`sidebar-item ${activeTab === 'All Babies' ? 'active' : ''}`} onClick={() => { setActiveTab('All Babies'); setIsSidebarOpen(false); }}>
-              <Baby size={16} /> Incubator Beds
+            <div className={`sidebar-item ${activeTab === 'Focused Telemetry' ? 'active' : ''}`} onClick={() => { setActiveTab('Focused Telemetry'); setIsSidebarOpen(false); }}>
+              <Baby size={16} /> Focused Telemetry
             </div>
             <div className={`sidebar-item ${activeTab === 'Alerts' ? 'active' : ''}`} onClick={() => { setActiveTab('Alerts'); setIsSidebarOpen(false); }}>
               <Bell size={16} /> Alerts
@@ -1474,7 +1474,7 @@ function App() {
         </header>
 
         {/* VIEW: MAIN DASHBOARD */}
-        {activeTab === 'Dashboard' && (() => {
+        {activeTab === 'Focused Telemetry' && (() => {
           const activeBaby = liveBabies.find((b: any) => b.id === selectedBabyId) || liveBabies[0] || {};
           const isCritical = activeBaby.status === 'CRITICAL';
           const isWarning = activeBaby.status === 'MODERATE';
@@ -1544,9 +1544,36 @@ function App() {
                   {/* PATIENT MONITORING AREA */}
                   <div className="glass-card" style={{ padding: '30px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px', marginBottom: '20px' }}>
-                      <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--primary)', margin: 0 }}>Patient ID: {activeBaby.babyId}</h3>
-                        <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 800 }}>AGE: {activeBaby.age} • WEIGHT: {activeBaby.weight} • GESTATION: {activeBaby.gestationalAge}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--primary)', margin: 0 }}>Bed: {activeBaby.incubatorId}</h3>
+                            <select 
+                              value={selectedBabyId}
+                              onChange={e => setSelectedBabyId(e.target.value)}
+                              style={{ 
+                                background: 'var(--card-bg)', 
+                                border: '1px solid var(--border-color)', 
+                                borderRadius: '8px', 
+                                padding: '6px 12px', 
+                                fontSize: '12px', 
+                                fontWeight: 800, 
+                                color: 'var(--text-main)', 
+                                outline: 'none',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                boxShadow: '0 2px 5px rgba(0,0,0,0.02)'
+                              }}
+                            >
+                              {liveBabies.map((b: any) => (
+                                <option key={b.id} value={b.id}>
+                                  {b.incubatorId} ({b.babyId})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 800 }}>AGE: {activeBaby.age} • WEIGHT: {activeBaby.weight} • GESTATION: {activeBaby.gestationalAge}</span>
+                        </div>
                       </div>
                       <span style={{ fontSize: '11px', fontWeight: 900, color: 'white', background: activeStatusColor, padding: '6px 14px', borderRadius: '10px', letterSpacing: '0.5px' }}>
                         STATUS: MONITORING ({activeBaby.status})
@@ -1771,7 +1798,7 @@ function App() {
         })()}
 
         {/* VIEW: ALL CLINICAL BEDS */}
-        {activeTab === 'All Babies' && (
+        {activeTab === 'Beds Overview' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1 }}>
             <div>
               <h3 style={{ fontSize: '20px', fontWeight: 900, color: 'var(--primary)', margin: 0 }}>Incubator Beds Directory</h3>
@@ -1915,15 +1942,15 @@ function App() {
         )}
 
         {/* Fallback View placeholders for non-active tabs */}
-        {(activeTab !== 'Dashboard' && activeTab !== 'All Babies' && activeTab !== 'Trends') && (
+        {(activeTab !== 'Beds Overview' && activeTab !== 'Focused Telemetry' && activeTab !== 'Trends') && (
           <div className="glass-card" style={{ padding: '60px', textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             <LayoutGrid size={48} color="var(--primary)" style={{ marginBottom: '20px' }} />
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: 'var(--primary)' }}>{activeTab} Analytics Terminal</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', maxWidth: '400px', marginTop: '6px' }}>
               Real-time predictions continue streaming on the primary NAVAAYU dashboard overview tab.
             </p>
-            <button onClick={() => setActiveTab('Dashboard')} className="sidebar-item active" style={{ marginTop: '20px', border: 'none' }}>
-              Return to Dashboard Overview
+            <button onClick={() => setActiveTab('Beds Overview')} className="sidebar-item active" style={{ marginTop: '20px', border: 'none' }}>
+              Return to Beds Overview
             </button>
           </div>
         )}
