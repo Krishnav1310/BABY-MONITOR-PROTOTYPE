@@ -9,26 +9,33 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 // Global CSS styles injection for Color Hunt warm professional neonatal ward theme
 const stylesHtml = `
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
   :root {
-    --bg-dark: #E6E6FA;            /* Lavender background */
-    --card-bg: rgba(255, 255, 255, 0.85); /* Clean white glass card background */
-    --border-color: rgba(47, 65, 86, 0.08); /* Subtle Navy outline border */
-    --primary: #2F4156;            /* Navy headers/primary layout */
-    --primary-glow: rgba(47, 65, 86, 0.12);
-    --mint: #0047AB;               /* Solid Cobalt Blue for normal status */
-    --accent: #D9822B;             /* High-contrast Orange for moderate status */
-    --secondary: #FF5E5E;          /* Critical alerts (keep red high contrast) */
-    --text-main: #2F4156;          /* Navy page text */
-    --text-muted: #567C8D;         /* Teal page subtext */
+    --bg-dark: #E0ECDE;            /* Light Sage backdrop */
+    --card-bg: #ffffff;            /* Solid flat cards */
+    --border-color: #CDE0C9;       /* Soft Sage outline border */
+    --primary: #2C6975;            /* Deep Teal headers/primary layout */
+    --primary-glow: rgba(44, 105, 117, 0.08);
+    --mint: #68B2A0;               /* Teal for normal status */
+    --accent: #d97706;             /* Amber for warning status */
+    --secondary: #e11d48;          /* Rose for critical alerts */
+    --text-main: #2C6975;          /* Deep Teal page text */
+    --text-muted: #68B2A0;         /* Teal page subtext */
   }
 
   body {
     background-color: var(--bg-dark);
     color: var(--text-main);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+  }
+
+  .technical-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
   }
 
   .glass-card {
@@ -459,16 +466,16 @@ function ThreeDTelemetryWidget({ heartRate }: { heartRate: number }) {
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Draw Node 1 (Teal/Mint)
+        // Draw Node 1 (Teal)
         ctx.beginPath();
         ctx.arc(x1, y, r1, 0, Math.PI * 2);
-        ctx.fillStyle = z1 > 0 ? '#567C8D' : '#C8D9E6';
+        ctx.fillStyle = z1 > 0 ? '#68B2A0' : '#CDE0C9';
         ctx.fill();
 
-        // Draw Node 2 (Cobalt/Navy)
+        // Draw Node 2 (Deep Teal)
         ctx.beginPath();
         ctx.arc(x2, y, r2, 0, Math.PI * 2);
-        ctx.fillStyle = z2 > 0 ? '#0047AB' : '#2F4156';
+        ctx.fillStyle = z2 > 0 ? '#2C6975' : '#CDE0C9';
         ctx.fill();
       }
 
@@ -534,8 +541,8 @@ function ThreeDParticleBackground() {
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Render Lavender backdrop directly in canvas to ensure contrast remains clear
-      ctx.fillStyle = 'rgba(230, 230, 250, 0.96)';
+      // Render Light Sage backdrop directly in canvas to ensure contrast remains clear
+      ctx.fillStyle = 'rgba(224, 236, 222, 0.98)';
       ctx.fillRect(0, 0, width, height);
 
       const projected: { x: number; y: number; size: number; z: number }[] = [];
@@ -564,18 +571,16 @@ function ThreeDParticleBackground() {
       // Draw connection lines in 3D
       for (let i = 0; i < numParticles; i++) {
         for (let j = i + 1; j < numParticles; j++) {
-          const p1 = particles[i];
-          const p2 = particles[j];
-          const distSq = Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2) + Math.pow(p1.z - p2.z, 2);
+          const distSq = Math.pow(particles[i].x - particles[j].x, 2) + Math.pow(particles[i].y - particles[j].y, 2) + Math.pow(particles[i].z - particles[j].z, 2);
 
           if (distSq < 160 * 160) {
             const dist = Math.sqrt(distSq);
-            const alpha = (1 - dist / 160) * 0.12;
+            const alpha = (1 - dist / 160) * 0.10;
             
             ctx.beginPath();
             ctx.moveTo(projected[i].x, projected[i].y);
             ctx.lineTo(projected[j].x, projected[j].y);
-            ctx.strokeStyle = `rgba(0, 71, 171, ${alpha})`; // Cobalt Blue connection paths
+            ctx.strokeStyle = `rgba(104, 178, 160, ${alpha})`; // Teal connection paths
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -588,8 +593,8 @@ function ThreeDParticleBackground() {
         if (proj.x >= 0 && proj.x <= width && proj.y >= 0 && proj.y <= height) {
           ctx.beginPath();
           ctx.arc(proj.x, proj.y, proj.size, 0, Math.PI * 2);
-          const alpha = 0.12 + (1 - (proj.z + 400) / 800) * 0.2;
-          ctx.fillStyle = `rgba(0, 71, 171, ${alpha})`;
+          const alpha = 0.10 + (1 - (proj.z + 400) / 800) * 0.15;
+          ctx.fillStyle = `rgba(104, 178, 160, ${alpha})`; // Teal nodes
           ctx.fill();
         }
       }
@@ -712,7 +717,7 @@ function App() {
     }
   ]);
   const [ecgData, setEcgData] = useState<any[]>(Array.from({ length: 45 }, (_, i) => ({ x: i, y: 0 })));
-  const [babyHistories, setBabyHistories] = useState<Record<string, { time: string; heartRate: number; spo2: number }[]>>({});
+  const [babyHistories, setBabyHistories] = useState<Record<string, { time: string; heartRate: number; spo2: number; temp?: number }[]>>({});
 
   const prevStatusesRef = useRef<Record<string, string>>({});
   const liveBabiesRef = useRef<any[]>([]);
@@ -801,18 +806,17 @@ function App() {
     return `${hrs}:${mins}:${secs}`;
   };
 
-  // Toast adder
-  // Toast adder removed since toasts are handled directly inside poll
-
   // 1. Data Polling from PC2 Edge AI (1 second polling interval for true real-time updates)
   useEffect(() => {
     if (!isAuthenticated) return;
 
     const poll = async () => {
+      let mappedBabies: any[] = [];
+
       if (isDemoMode) {
         // Run Simulated Demo Mode Updates locally when PC1/PC2 are bypassed
         setIsBackendOnline(false);
-        const mappedBabies = liveBabies.map((baby: any) => {
+        mappedBabies = liveBabies.map((baby: any) => {
           const seed = parseInt(baby.id.replace(/\D/g, '')) || 1;
           const timeOffset = Date.now() / 4000 + seed;
           
@@ -822,8 +826,8 @@ function App() {
           let resp = baby.vitals.respRate;
           let status = baby.status;
           let score = baby.predictionScore;
+          let reasons: string[] = [];
           
-          // Introduce dynamic simulated fluctuations
           if (baby.id === 'NB-2026-003') {
             status = 'MODERATE';
             score = 71;
@@ -831,6 +835,7 @@ function App() {
             spo2 = Math.round(91 + Math.sin(timeOffset) * 1 + Math.random() * 1);
             temp = parseFloat((37.8 + Math.sin(timeOffset) * 0.1).toFixed(1));
             resp = Math.round(52 + Math.sin(timeOffset) * 2);
+            reasons = [`SpO₂: ${spo2}% ⬇️`, `Heart Rate: ${hr} bpm ⬆️`];
           } else if (baby.id === 'NB-2026-005' && Math.sin(timeOffset) > 0.75) {
             status = 'MODERATE';
             score = 74;
@@ -838,6 +843,7 @@ function App() {
             spo2 = Math.round(92 - Math.random() * 1);
             temp = 37.4;
             resp = 48;
+            reasons = [`SpO₂: ${spo2}% ⬇️`];
           } else {
             status = 'NORMAL';
             score = Math.round(90 + Math.sin(timeOffset) * 5);
@@ -851,103 +857,157 @@ function App() {
             ...baby,
             status,
             predictionScore: score,
+            reasons,
             lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
             vitals: { heartRate: hr, respRate: resp, spo2, temp }
           };
         });
+      } else {
+        // Normal Active Backend Polling
+        try {
+          const res = await fetch(`${API_BASE_URL}/latest`);
+          if (!res.ok) throw new Error("PC2 Edge AI Connection Failed");
+          const json = await res.json();
+          if (!json.success || !json.babies) throw new Error("Invalid API Response");
 
-        setLiveBabies(mappedBabies);
-        return;
+          const babiesInfo: Record<string, any> = {
+            "NB-2026-001": { babyId: "NB-2026-001", incubatorId: "NICU-001", age: "3 days old", weight: "3.2 kg", gestationalAge: "38 weeks" },
+            "NICU_001": { babyId: "NB-2026-001", incubatorId: "NICU-001", age: "3 days old", weight: "3.2 kg", gestationalAge: "38 weeks" },
+            "NB-2026-002": { babyId: "NB-2026-002", incubatorId: "NICU-002", age: "5 days old", weight: "2.9 kg", gestationalAge: "37 weeks" },
+            "NICU_002": { babyId: "NICU-002", incubatorId: "NICU-002", age: "5 days old", weight: "2.9 kg", gestationalAge: "37 weeks" },
+            "NB-2026-003": { babyId: "NB-2026-003", incubatorId: "NICU-003", age: "2 days old", weight: "3.1 kg", gestationalAge: "39 weeks" },
+            "NICU_003": { babyId: "NICU-003", incubatorId: "NICU-003", age: "2 days old", weight: "3.1 kg", gestationalAge: "39 weeks" },
+            "NB-2026-004": { babyId: "NB-2026-004", incubatorId: "NICU-004", age: "6 days old", weight: "3.4 kg", gestationalAge: "38 weeks" },
+            "NICU_004": { babyId: "NICU-004", incubatorId: "NICU-004", age: "6 days old", weight: "3.4 kg", gestationalAge: "38 weeks" },
+            "NB-2026-005": { babyId: "NB-2026-005", incubatorId: "NICU-005", age: "4 days old", weight: "2.7 kg", gestationalAge: "36 weeks" },
+            "NICU_005": { babyId: "NICU-005", incubatorId: "NICU-005", age: "4 days old", weight: "2.7 kg", gestationalAge: "36 weeks" }
+          };
+
+          const getStaticInfo = (rawId: string) => {
+            const idStr = String(rawId).toUpperCase();
+            if (idStr.includes("001") || idStr.includes("01") || idStr.endsWith("1")) return babiesInfo["NB-2026-001"];
+            if (idStr.includes("002") || idStr.includes("02") || idStr.endsWith("2")) return babiesInfo["NB-2026-002"];
+            if (idStr.includes("003") || idStr.includes("03") || idStr.endsWith("3")) return babiesInfo["NB-2026-003"];
+            if (idStr.includes("004") || idStr.includes("04") || idStr.endsWith("4")) return babiesInfo["NB-2026-004"];
+            if (idStr.includes("005") || idStr.includes("05") || idStr.endsWith("5")) return babiesInfo["NB-2026-005"];
+            return babiesInfo["NB-2026-001"];
+          };
+
+          mappedBabies = json.babies.map((b: any) => {
+            const staticInfo = getStaticInfo(b.baby_id);
+            
+            let hr = b.vitals?.heart_rate_bpm ? Math.round(b.vitals.heart_rate_bpm) : 0;
+            let resp = b.vitals?.respiratory_rate_bpm ? Math.round(b.vitals.respiratory_rate_bpm) : 0;
+            let spo2 = b.vitals?.oxygen_saturation ? Math.round(b.vitals.oxygen_saturation) : 0;
+            let temp = b.vitals?.temperature_c ? parseFloat(b.vitals.temperature_c.toFixed(1)) : 0;
+            const score = b.prediction_score || 0;
+            const status = b.status || "NORMAL";
+
+            if (hr === 0 || spo2 === 0) {
+              const seed = parseInt(b.baby_id.replace(/\D/g, '')) || 1;
+              const timeOffset = Date.now() / 4000 + seed;
+              if (status === 'CRITICAL') {
+                hr = Math.round(175 + Math.sin(timeOffset) * 10 + Math.random() * 5);
+                spo2 = Math.round(82 + Math.sin(timeOffset) * 3 + Math.random() * 2);
+                temp = parseFloat((38.8 + Math.sin(timeOffset) * 0.2 + Math.random() * 0.1).toFixed(1));
+                resp = Math.round(68 + Math.sin(timeOffset) * 4 + Math.random() * 2);
+              } else if (status === 'MODERATE') {
+                hr = Math.round(152 + Math.sin(timeOffset) * 8 + Math.random() * 4);
+                spo2 = Math.round(91 + Math.sin(timeOffset) * 2 + Math.random() * 1);
+                temp = parseFloat((37.8 + Math.sin(timeOffset) * 0.15 + Math.random() * 0.1).toFixed(1));
+                resp = Math.round(52 + Math.sin(timeOffset) * 3 + Math.random() * 1);
+              } else {
+                hr = Math.round(135 + Math.sin(timeOffset) * 5 + Math.random() * 3);
+                spo2 = Math.round(98 - Math.random() * 1);
+                temp = parseFloat((36.7 + Math.sin(timeOffset) * 0.1 + Math.random() * 0.1).toFixed(1));
+                resp = Math.round(38 + Math.sin(timeOffset) * 2 + Math.random() * 1);
+              }
+            }
+
+            let lastUpdated = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            if (b.timestamp) {
+              const date = new Date(b.timestamp * 1000);
+              if (!isNaN(date.getTime())) {
+                lastUpdated = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              }
+            }
+
+            return {
+              id: staticInfo.babyId,
+              babyId: staticInfo.babyId,
+              incubatorId: staticInfo.incubatorId,
+              age: staticInfo.age,
+              weight: staticInfo.weight,
+              gestationalAge: staticInfo.gestationalAge,
+              status,
+              simulationMode: 'off',
+              isLiveSource: staticInfo.babyId === selectedBabyId,
+              lastUpdated,
+              vitals: { heartRate: hr, respRate: resp, spo2, temp },
+              reasons: b.reasons || [],
+              predictionScore: score
+            };
+          });
+
+          setIsBackendOnline(true);
+          setError(null);
+        } catch (err: any) {
+          console.error("Polling Error:", err);
+          setIsBackendOnline(false);
+          setError(err.message);
+
+          // Fallback local ticks when server is offline
+          mappedBabies = liveBabies.map((baby: any) => {
+            const seed = parseInt(baby.id.replace(/\D/g, '')) || 1;
+            const timeOffset = Date.now() / 4000 + seed;
+            
+            let hr = baby.vitals.heartRate;
+            let spo2 = baby.vitals.spo2;
+            let temp = baby.vitals.temp;
+            let resp = baby.vitals.respRate;
+            let status = baby.status;
+            let score = baby.predictionScore;
+            let reasons: string[] = [];
+
+            if (baby.id === 'NB-2026-003') {
+              status = 'MODERATE';
+              score = 71;
+              hr = Math.round(152 + Math.sin(timeOffset) * 5 + Math.random() * 2);
+              spo2 = Math.round(91 + Math.sin(timeOffset) * 1);
+              temp = parseFloat((37.8 + Math.sin(timeOffset) * 0.1).toFixed(1));
+              resp = Math.round(52 + Math.sin(timeOffset) * 1);
+              reasons = [`SpO₂: ${spo2}% ⬇️`, `Heart Rate: ${hr} bpm ⬆️`];
+            } else if (baby.id === 'NB-2026-005' && Math.sin(timeOffset) > 0.75) {
+              status = 'MODERATE';
+              score = 74;
+              hr = Math.round(156 + Math.random() * 4);
+              spo2 = Math.round(92 - Math.random() * 1);
+              temp = 37.4;
+              resp = 48;
+              reasons = [`SpO₂: ${spo2}% ⬇️`];
+            } else {
+              status = 'NORMAL';
+              score = Math.round(90 + Math.sin(timeOffset) * 2);
+              hr = Math.round(135 + Math.sin(timeOffset) * 4 + Math.random() * 2);
+              spo2 = Math.round(98 - Math.random() * 1);
+              temp = parseFloat((36.7 + Math.sin(timeOffset) * 0.05 + Math.random() * 0.05).toFixed(1));
+              resp = Math.round(38 + Math.sin(timeOffset) * 1 + Math.random() * 1);
+            }
+
+            return {
+              ...baby,
+              status,
+              predictionScore: score,
+              reasons,
+              lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+              vitals: { heartRate: hr, respRate: resp, spo2, temp }
+            };
+          });
+        }
       }
 
-      // Normal Active Backend Polling
-      try {
-        const res = await fetch(`${API_BASE_URL}/latest`);
-        if (!res.ok) throw new Error("PC2 Edge AI Connection Failed");
-        const json = await res.json();
-        if (!json.success || !json.babies) throw new Error("Invalid API Response");
-
-        setIsBackendOnline(true);
-        const babiesInfo: Record<string, any> = {
-          "NB-2026-001": { babyId: "NB-2026-001", incubatorId: "NICU-001", age: "3 days old", weight: "3.2 kg", gestationalAge: "38 weeks" },
-          "NICU_001": { babyId: "NB-2026-001", incubatorId: "NICU-001", age: "3 days old", weight: "3.2 kg", gestationalAge: "38 weeks" },
-          "NB-2026-002": { babyId: "NB-2026-002", incubatorId: "NICU-002", age: "5 days old", weight: "2.9 kg", gestationalAge: "37 weeks" },
-          "NICU_002": { babyId: "NB-2026-002", incubatorId: "NICU-002", age: "5 days old", weight: "2.9 kg", gestationalAge: "37 weeks" },
-          "NB-2026-003": { babyId: "NB-2026-003", incubatorId: "NICU-003", age: "2 days old", weight: "3.1 kg", gestationalAge: "39 weeks" },
-          "NICU_003": { babyId: "NB-2026-003", incubatorId: "NICU-003", age: "2 days old", weight: "3.1 kg", gestationalAge: "39 weeks" },
-          "NB-2026-004": { babyId: "NB-2026-004", incubatorId: "NICU-004", age: "6 days old", weight: "3.4 kg", gestationalAge: "38 weeks" },
-          "NICU_004": { babyId: "NB-2026-004", incubatorId: "NICU-004", age: "6 days old", weight: "3.4 kg", gestationalAge: "38 weeks" },
-          "NB-2026-005": { babyId: "NB-2026-005", incubatorId: "NICU-005", age: "4 days old", weight: "2.7 kg", gestationalAge: "36 weeks" },
-          "NICU_005": { babyId: "NB-2026-005", incubatorId: "NICU-005", age: "4 days old", weight: "2.7 kg", gestationalAge: "36 weeks" }
-        };
-
-        const getStaticInfo = (rawId: string) => {
-          const idStr = String(rawId).toUpperCase();
-          if (idStr.includes("001") || idStr.includes("01") || idStr.endsWith("1")) return babiesInfo["NB-2026-001"];
-          if (idStr.includes("002") || idStr.includes("02") || idStr.endsWith("2")) return babiesInfo["NB-2026-002"];
-          if (idStr.includes("003") || idStr.includes("03") || idStr.endsWith("3")) return babiesInfo["NB-2026-003"];
-          if (idStr.includes("004") || idStr.includes("04") || idStr.endsWith("4")) return babiesInfo["NB-2026-004"];
-          if (idStr.includes("005") || idStr.includes("05") || idStr.endsWith("5")) return babiesInfo["NB-2026-005"];
-          return babiesInfo["NB-2026-001"];
-        };
-
-        const mappedBabies = json.babies.map((b: any) => {
-          const staticInfo = getStaticInfo(b.baby_id);
-          
-          let hr = b.vitals?.heart_rate_bpm ? Math.round(b.vitals.heart_rate_bpm) : 0;
-          let resp = b.vitals?.respiratory_rate_bpm ? Math.round(b.vitals.respiratory_rate_bpm) : 0;
-          let spo2 = b.vitals?.oxygen_saturation ? Math.round(b.vitals.oxygen_saturation) : 0;
-          let temp = b.vitals?.temperature_c ? parseFloat(b.vitals.temperature_c.toFixed(1)) : 0;
-          const score = b.prediction_score || 0;
-          const status = b.status || "NORMAL";
-
-          if (hr === 0 || spo2 === 0) {
-            const seed = parseInt(b.baby_id.replace(/\D/g, '')) || 1;
-            const timeOffset = Date.now() / 4000 + seed;
-            if (status === 'CRITICAL') {
-              hr = Math.round(175 + Math.sin(timeOffset) * 10 + Math.random() * 5);
-              spo2 = Math.round(82 + Math.sin(timeOffset) * 3 + Math.random() * 2);
-              temp = parseFloat((38.8 + Math.sin(timeOffset) * 0.2 + Math.random() * 0.1).toFixed(1));
-              resp = Math.round(68 + Math.sin(timeOffset) * 4 + Math.random() * 2);
-            } else if (status === 'MODERATE') {
-              hr = Math.round(152 + Math.sin(timeOffset) * 8 + Math.random() * 4);
-              spo2 = Math.round(91 + Math.sin(timeOffset) * 2 + Math.random() * 1);
-              temp = parseFloat((37.8 + Math.sin(timeOffset) * 0.15 + Math.random() * 0.1).toFixed(1));
-              resp = Math.round(52 + Math.sin(timeOffset) * 3 + Math.random() * 1);
-            } else {
-              hr = Math.round(135 + Math.sin(timeOffset) * 5 + Math.random() * 3);
-              spo2 = Math.round(98 - Math.random() * 1);
-              temp = parseFloat((36.7 + Math.sin(timeOffset) * 0.1 + Math.random() * 0.1).toFixed(1));
-              resp = Math.round(38 + Math.sin(timeOffset) * 2 + Math.random() * 1);
-            }
-          }
-
-          let lastUpdated = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-          if (b.timestamp) {
-            const date = new Date(b.timestamp * 1000);
-            if (!isNaN(date.getTime())) {
-              lastUpdated = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            }
-          }
-
-          return {
-            id: staticInfo.babyId,
-            babyId: staticInfo.babyId,
-            incubatorId: staticInfo.incubatorId,
-            age: staticInfo.age,
-            weight: staticInfo.weight,
-            gestationalAge: staticInfo.gestationalAge,
-            status,
-            simulationMode: 'off',
-            isLiveSource: staticInfo.babyId === selectedBabyId,
-            lastUpdated,
-            vitals: { heartRate: hr, respRate: resp, spo2, temp },
-            reasons: b.reasons || [],
-            predictionScore: score
-          };
-        });
-
-        // Detect status transitions and trigger toasts
+      // Sync step for all data paths
+      if (mappedBabies.length > 0) {
         mappedBabies.forEach((baby: any) => {
           const prevStatus = prevStatusesRef.current[baby.id];
           if (prevStatus && prevStatus !== baby.status) {
@@ -973,7 +1033,6 @@ function App() {
           prevStatusesRef.current[baby.id] = baby.status;
         });
 
-        // Merge updates with existing 5 babies to keep directory stable
         setLiveBabies(prev => 
           prev.map(oldBaby => {
             const pc2Update = mappedBabies.find((b: any) => b.id === oldBaby.id);
@@ -987,26 +1046,21 @@ function App() {
           })
         );
 
-        // Update histories for Trends tab charts
         setBabyHistories(prev => {
           const updated = { ...prev };
           mappedBabies.forEach((b: any) => {
             const historyList = updated[b.id] || [];
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            updated[b.id] = [...historyList.slice(-19), { time: timeStr, heartRate: b.vitals.heartRate, spo2: b.vitals.spo2 }];
+            updated[b.id] = [...historyList.slice(-19), { time: timeStr, heartRate: b.vitals.heartRate, spo2: b.vitals.spo2, temp: b.vitals.temp }];
           });
           return updated;
         });
 
-        // Set the active baby based on selection
         const activeBabyObj = mappedBabies.find((b: any) => b.id === selectedBabyId) || mappedBabies[0] || {};
         const activeId = activeBabyObj.id || selectedBabyId;
-
-        // Overall stats calculation
         const totalModerate = mappedBabies.filter((b: any) => b.status === "MODERATE").length;
         const totalCritical = mappedBabies.filter((b: any) => b.status === "CRITICAL").length;
 
-        // Alerts aggregation
         const activeAlerts: any[] = [];
         mappedBabies.forEach((b: any) => {
           if (b.status === "CRITICAL" || b.status === "MODERATE") {
@@ -1019,7 +1073,7 @@ function App() {
           }
         });
 
-        const mappedData = {
+        setData({
           activeBabyId: activeId,
           babies: mappedBabies,
           alerts: activeAlerts,
@@ -1056,106 +1110,6 @@ function App() {
             apneaAlertTime: 20,
             stillnessWarningTime: 12,
             slowBreathingRate: 30
-          }
-        };
-
-        setData(mappedData);
-        setError(null);
-
-      } catch (err: any) {
-        console.error("Polling Error:", err);
-        setIsBackendOnline(false);
-        setError(err.message);
-
-        // Fallback local ticks when server is offline
-        const mappedBabies = liveBabies.map((baby: any) => {
-          const seed = parseInt(baby.id.replace(/\D/g, '')) || 1;
-          const timeOffset = Date.now() / 4000 + seed;
-          
-          let hr = baby.vitals.heartRate;
-          let spo2 = baby.vitals.spo2;
-          let temp = baby.vitals.temp;
-          let resp = baby.vitals.respRate;
-          let status = baby.status;
-          let score = baby.predictionScore;
-
-          if (baby.id === 'NB-2026-003') {
-            status = 'MODERATE';
-            score = 71;
-            hr = Math.round(152 + Math.sin(timeOffset) * 5 + Math.random() * 2);
-            spo2 = Math.round(91 + Math.sin(timeOffset) * 1);
-            temp = parseFloat((37.8 + Math.sin(timeOffset) * 0.1).toFixed(1));
-            resp = Math.round(52 + Math.sin(timeOffset) * 1);
-          } else if (baby.id === 'NB-2026-005' && Math.sin(timeOffset) > 0.75) {
-            status = 'MODERATE';
-            score = 74;
-            hr = Math.round(156 + Math.random() * 4);
-            spo2 = Math.round(92 - Math.random() * 1);
-            temp = 37.4;
-            resp = 48;
-          } else {
-            status = 'NORMAL';
-            score = Math.round(90 + Math.sin(timeOffset) * 2);
-            hr = Math.round(135 + Math.sin(timeOffset) * 4 + Math.random() * 2);
-            spo2 = Math.round(98 - Math.random() * 1);
-            temp = parseFloat((36.7 + Math.sin(timeOffset) * 0.05 + Math.random() * 0.05).toFixed(1));
-            resp = Math.round(38 + Math.sin(timeOffset) * 1 + Math.random() * 1);
-          }
-
-          return {
-            ...baby,
-            status,
-            predictionScore: score,
-            lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-            vitals: { heartRate: hr, respRate: resp, spo2, temp }
-          };
-        });
-
-        // Set local babies and update histories
-        setLiveBabies(mappedBabies);
-
-        setBabyHistories(prev => {
-          const updated = { ...prev };
-          mappedBabies.forEach((b: any) => {
-            const historyList = updated[b.id] || [];
-            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            updated[b.id] = [...historyList.slice(-19), { time: timeStr, heartRate: b.vitals.heartRate, spo2: b.vitals.spo2 }];
-          });
-          return updated;
-        });
-
-        // Set mapped data object so that UI doesn't crash on null fields
-        const activeBabyObj = mappedBabies.find((b: any) => b.id === selectedBabyId) || mappedBabies[0] || {};
-        const activeId = activeBabyObj.id || selectedBabyId;
-        const totalModerate = mappedBabies.filter((b: any) => b.status === "MODERATE").length;
-        const totalCritical = mappedBabies.filter((b: any) => b.status === "CRITICAL").length;
-
-        const activeAlerts: any[] = [];
-        mappedBabies.forEach((b: any) => {
-          if (b.status === "CRITICAL" || b.status === "MODERATE") {
-            activeAlerts.push({
-              id: b.id,
-              type: b.status === "CRITICAL" ? "critical" : "warning",
-              message: `Incubator ${b.incubatorId} Alert: AI Warning State`,
-              timestamp: b.lastUpdated
-            });
-          }
-        });
-
-        setData({
-          activeBabyId: activeId,
-          babies: mappedBabies,
-          alerts: activeAlerts,
-          totalModerate,
-          totalCritical,
-          patient: {
-            id: activeBabyObj.id,
-            babyId: activeBabyObj.babyId,
-            incubatorId: activeBabyObj.incubatorId,
-            age: activeBabyObj.age,
-            weight: activeBabyObj.weight,
-            gestationalAge: activeBabyObj.gestationalAge,
-            status: activeBabyObj.status
           }
         });
       }
@@ -1661,7 +1615,7 @@ function App() {
                           <YAxis stroke="var(--text-muted)" fontSize={9} fontWeight="bold" />
                           <Tooltip contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', fontSize: '11px', fontWeight: 800 }} />
                           <Area type="monotone" dataKey="heartRate" stroke="var(--mint)" strokeWidth={2} fillOpacity={1} fill="url(#colorHR)" name="Heart Rate (BPM)" />
-                          <Area type="monotone" dataKey="spo2" stroke="#0047AB" strokeWidth={2} fill="transparent" name="SpO₂ (%)" />
+                          <Area type="monotone" dataKey="spo2" stroke="#2C6975" strokeWidth={2} fill="transparent" name="SpO₂ (%)" />
                           <Area type="monotone" dataKey="temp" stroke="var(--accent)" strokeWidth={1.5} fill="transparent" name="Temp (°C)" />
                         </AreaChart>
                       </ResponsiveContainer>
@@ -2037,42 +1991,42 @@ function LandingPage({ onGoToLogin }: { onGoToLogin: () => void }) {
 
       {/* 1. HERO SECTION */}
       <section style={{ minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 40px', boxSizing: 'border-box', position: 'relative', zIndex: 10 }}>
-        <div className="glass-card" style={{ width: '1000px', display: 'flex', gap: '50px', padding: '60px', alignItems: 'center' }}>
+        <div className="glass-card" style={{ maxWidth: '1000px', width: '100%', display: 'flex', gap: '50px', padding: '60px', alignItems: 'center', boxSizing: 'border-box' }}>
           {/* Left Side: SVG Doctor illustration */}
           <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
             <svg viewBox="0 0 500 500" width="100%" height="340">
-              <circle cx="250" cy="250" r="180" fill="rgba(86, 124, 141, 0.08)" />
-              <path d="M 120 450 Q 250 320 380 450 Z" fill="#2F4156" />
-              <path d="M 210 380 L 250 450 L 290 380 Z" fill="#F5EFEB" />
-              <path d="M 245 400 L 255 400 L 258 450 L 250 460 L 242 450 Z" fill="#0047AB" />
+              <circle cx="250" cy="250" r="180" fill="rgba(104, 178, 160, 0.08)" />
+              <path d="M 120 450 Q 250 320 380 450 Z" fill="#2C6975" />
+              <path d="M 210 380 L 250 450 L 290 380 Z" fill="#E0ECDE" />
+              <path d="M 245 400 L 255 400 L 258 450 L 250 460 L 242 450 Z" fill="#2C6975" />
               <path d="M 160 410 L 210 430 L 195 450 Z" fill="#FFFFFF" />
               <path d="M 340 410 L 290 430 L 305 450 Z" fill="#FFFFFF" />
-              <path d="M 180 340 Q 250 400 320 340" fill="none" stroke="#567C8D" strokeWidth="6" strokeLinecap="round" />
-              <path d="M 250 395 L 250 430" fill="none" stroke="#567C8D" strokeWidth="4" />
-              <circle cx="250" cy="435" r="12" fill="#567C8D" />
-              <rect x="225" y="270" width="50" height="50" rx="10" fill="#F5EFEB" />
-              <circle cx="250" cy="240" r="50" fill="#F5EFEB" />
-              <path d="M 200 230 Q 250 180 300 230 Q 290 205 270 200 Q 250 200 230 205 Z" fill="#2F4156" />
-              <rect x="215" y="225" width="28" height="18" rx="4" fill="none" stroke="#2F4156" strokeWidth="3" />
-              <rect x="257" y="225" width="28" height="18" rx="4" fill="none" stroke="#2F4156" strokeWidth="3" />
-              <line x1="243" y1="234" x2="257" y2="234" stroke="#2F4156" strokeWidth="3" />
-              <path d="M 245 255 Q 250 260 255 255" fill="none" stroke="#2F4156" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M 180 340 Q 250 400 320 340" fill="none" stroke="#68B2A0" strokeWidth="6" strokeLinecap="round" />
+              <path d="M 250 395 L 250 430" fill="none" stroke="#68B2A0" strokeWidth="4" />
+              <circle cx="250" cy="435" r="12" fill="#68B2A0" />
+              <rect x="225" y="270" width="50" height="50" rx="10" fill="#E0ECDE" />
+              <circle cx="250" cy="240" r="50" fill="#E0ECDE" />
+              <path d="M 200 230 Q 250 180 300 230 Q 290 205 270 200 Q 250 200 230 205 Z" fill="#2C6975" />
+              <rect x="215" y="225" width="28" height="18" rx="4" fill="none" stroke="#2C6975" strokeWidth="3" />
+              <rect x="257" y="225" width="28" height="18" rx="4" fill="none" stroke="#2C6975" strokeWidth="3" />
+              <line x1="243" y1="234" x2="257" y2="234" stroke="#2C6975" strokeWidth="3" />
+              <path d="M 245 255 Q 250 260 255 255" fill="none" stroke="#2C6975" strokeWidth="2.5" strokeLinecap="round" />
               <g transform="translate(320, 150) rotate(5)">
-                <rect x="0" y="0" width="100" height="140" rx="12" fill="#FFFFFF" stroke="rgba(47, 65, 86, 0.15)" strokeWidth="2" />
-                <rect x="30" y="-8" width="40" height="16" rx="4" fill="#567C8D" />
-                <line x1="15" y1="30" x2="85" y2="30" stroke="#2F4156" strokeWidth="3" strokeLinecap="round" />
-                <line x1="15" y1="50" x2="70" y2="50" stroke="#567C8D" strokeWidth="2" />
-                <line x1="15" y1="70" x2="80" y2="70" stroke="#567C8D" strokeWidth="2" />
-                <path d="M 15 110 L 30 110 L 35 95 L 40 125 L 45 105 L 50 110 L 85 110" fill="none" stroke="#FF5E5E" strokeWidth="2" strokeLinecap="round" />
+                <rect x="0" y="0" width="100" height="140" rx="12" fill="#FFFFFF" stroke="rgba(44, 105, 117, 0.15)" strokeWidth="2" />
+                <rect x="30" y="-8" width="40" height="16" rx="4" fill="#68B2A0" />
+                <line x1="15" y1="30" x2="85" y2="30" stroke="#2C6975" strokeWidth="3" strokeLinecap="round" />
+                <line x1="15" y1="50" x2="70" y2="50" stroke="#68B2A0" strokeWidth="2" />
+                <line x1="15" y1="70" x2="80" y2="70" stroke="#68B2A0" strokeWidth="2" />
+                <path d="M 15 110 L 30 110 L 35 95 L 40 125 L 45 105 L 50 110 L 85 110" fill="none" stroke="#e11d48" strokeWidth="2" strokeLinecap="round" />
               </g>
-              <path d="M 80 180 L 110 180 M 95 165 L 95 195" stroke="#567C8D" strokeWidth="4" strokeLinecap="round" opacity="0.4" />
-              <path d="M 400 320 L 420 320 M 410 310 L 410 330" stroke="#567C8D" strokeWidth="3" strokeLinecap="round" opacity="0.4" />
+              <path d="M 80 180 L 110 180 M 95 165 L 95 195" stroke="#68B2A0" strokeWidth="4" strokeLinecap="round" opacity="0.4" />
+              <path d="M 400 320 L 420 320 M 410 310 L 410 330" stroke="#68B2A0" strokeWidth="3" strokeLinecap="round" opacity="0.4" />
             </svg>
           </div>
           {/* Right Side: Title + CTAs */}
           <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <span style={{ fontSize: '11px', fontWeight: 900, color: '#0047AB', background: 'rgba(0,71,171,0.06)', padding: '6px 14px', borderRadius: '30px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>clinical edge ai portal</span>
+              <span style={{ fontSize: '11px', fontWeight: 900, color: '#2C6975', background: 'rgba(44,105,117,0.06)', padding: '6px 14px', borderRadius: '30px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>clinical edge ai portal</span>
               <h1 style={{ fontSize: '56px', fontWeight: 900, color: 'var(--primary)', margin: '14px 0 10px 0', letterSpacing: '-2px', lineHeight: 1 }}>NAVAAYU</h1>
               <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-muted)', margin: '0 0 16px 0', lineHeight: 1.3 }}>AI-Powered Neonatal Monitoring</h2>
               <p style={{ color: 'var(--text-main)', fontSize: '13.5px', fontWeight: 600, margin: 0, lineHeight: 1.5, opacity: 0.85 }}>
@@ -2080,10 +2034,10 @@ function LandingPage({ onGoToLogin }: { onGoToLogin: () => void }) {
               </p>
             </div>
             <div style={{ display: 'flex', gap: '16px' }}>
-              <button onClick={onGoToLogin} className="vibrant-btn" style={{ padding: '16px 28px', fontSize: '14px', fontWeight: 900, borderRadius: '12px', background: '#0047AB', color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(0, 71, 171, 0.25)' }}>
+              <button onClick={onGoToLogin} className="vibrant-btn" style={{ padding: '16px 28px', fontSize: '14px', fontWeight: 900, borderRadius: '12px', background: 'var(--primary)', color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(44, 105, 117, 0.25)' }}>
                 Get Started
               </button>
-              <button onClick={handleHowItWorks} className="vibrant-btn" style={{ padding: '16px 28px', fontSize: '14px', fontWeight: 900, borderRadius: '12px', background: 'rgba(47, 65, 86, 0.05)', color: 'var(--primary)', border: '1px solid var(--border-color)', cursor: 'pointer' }}>
+              <button onClick={handleHowItWorks} className="vibrant-btn" style={{ padding: '16px 28px', fontSize: '14px', fontWeight: 900, borderRadius: '12px', background: 'rgba(44, 105, 117, 0.05)', color: 'var(--primary)', border: '1px solid var(--border-color)', cursor: 'pointer' }}>
                 How It Works
               </button>
             </div>
@@ -2155,29 +2109,29 @@ function LandingPage({ onGoToLogin }: { onGoToLogin: () => void }) {
         </div>
 
         {/* Process Flow */}
-        <div className="glass-card" style={{ width: '1000px', padding: '40px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="glass-card" style={{ maxWidth: '1000px', width: '100%', padding: '40px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box' }}>
           <div style={{ textAlign: 'center', flex: 1 }}>
-            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#0047AB', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', margin: '0 auto 10px auto', fontWeight: 900 }}>1</div>
+            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#2C6975', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', margin: '0 auto 10px auto', fontWeight: 900 }}>1</div>
             <div style={{ fontSize: '12px', fontWeight: 900, color: 'var(--text-main)' }}>Vital Signs</div>
           </div>
           <div style={{ color: 'var(--text-muted)', fontSize: '20px', animation: 'pulse-soft 1s infinite' }}>➔</div>
           <div style={{ textAlign: 'center', flex: 1 }}>
-            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#0047AB', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', margin: '0 auto 10px auto', fontWeight: 900 }}>2</div>
+            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#2C6975', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', margin: '0 auto 10px auto', fontWeight: 900 }}>2</div>
             <div style={{ fontSize: '12px', fontWeight: 900, color: 'var(--text-main)' }}>Data Processing</div>
           </div>
           <div style={{ color: 'var(--text-muted)', fontSize: '20px', animation: 'pulse-soft 1s infinite' }}>➔</div>
           <div style={{ textAlign: 'center', flex: 1 }}>
-            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#0047AB', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', margin: '0 auto 10px auto', fontWeight: 900 }}>3</div>
+            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#2C6975', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', margin: '0 auto 10px auto', fontWeight: 900 }}>3</div>
             <div style={{ fontSize: '12px', fontWeight: 900, color: 'var(--text-main)' }}>AI / ML Model</div>
           </div>
           <div style={{ color: 'var(--text-muted)', fontSize: '20px', animation: 'pulse-soft 1s infinite' }}>➔</div>
           <div style={{ textAlign: 'center', flex: 1 }}>
-            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#0047AB', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', margin: '0 auto 10px auto', fontWeight: 900 }}>4</div>
+            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#2C6975', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', margin: '0 auto 10px auto', fontWeight: 900 }}>4</div>
             <div style={{ fontSize: '12px', fontWeight: 900, color: 'var(--text-main)' }}>Risk Prediction</div>
           </div>
           <div style={{ color: 'var(--text-muted)', fontSize: '20px', animation: 'pulse-soft 1s infinite' }}>➔</div>
           <div style={{ textAlign: 'center', flex: 1 }}>
-            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#D9822B', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', margin: '0 auto 10px auto', fontWeight: 900 }}>5</div>
+            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#d97706', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', margin: '0 auto 10px auto', fontWeight: 900 }}>5</div>
             <div style={{ fontSize: '12px', fontWeight: 900, color: 'var(--text-main)' }}>Dashboard & Alerts</div>
           </div>
         </div>
@@ -2185,33 +2139,33 @@ function LandingPage({ onGoToLogin }: { onGoToLogin: () => void }) {
 
       {/* 5. PROTOTYPE 3-PC ARCHITECTURE SECTION */}
       <section style={{ padding: '80px 40px 100px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10, position: 'relative' }}>
-        <div style={{ width: '1000px', textAlign: 'center', marginBottom: '30px' }}>
+        <div style={{ maxWidth: '1000px', width: '100%', textAlign: 'center', marginBottom: '30px' }}>
           <h2 style={{ fontSize: '32px', fontWeight: 900, color: 'var(--primary)', margin: 0 }}>How Our Prototype Works</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '13px', fontWeight: 700, margin: '8px 0 0 0' }}>Decoupled local 3-PC hardware setup for real-time telemetry demonstration</p>
         </div>
         
         {/* Animated 3-PC Grid */}
-        <div className="glass-card" style={{ width: '1000px', padding: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div className="glass-card" style={{ maxWidth: '1000px', width: '100%', padding: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box' }}>
           <svg viewBox="0 0 800 200" width="100%" height="140">
             <style>{`
               @keyframes dash {
                 to { stroke-dashoffset: -1000; }
               }
             `}</style>
-            <rect x="30" y="45" width="180" height="90" rx="16" fill="var(--card-bg)" stroke="#0047AB" strokeWidth="2.5" />
-            <text x="120" y="80" textAnchor="middle" fill="#0047AB" fontWeight="900" fontSize="13">PC 1</text>
+            <rect x="30" y="45" width="180" height="90" rx="16" fill="var(--card-bg)" stroke="#2C6975" strokeWidth="2.5" />
+            <text x="120" y="80" textAnchor="middle" fill="#2C6975" fontWeight="900" fontSize="13">PC 1</text>
             <text x="120" y="105" textAnchor="middle" fill="var(--text-muted)" fontWeight="700" fontSize="10.5">Real-Time Data Source</text>
             
-            <path d="M 210 90 L 390 90" stroke="#0047AB" strokeWidth="2.5" strokeDasharray="8 6" style={{ animation: 'dash 15s linear infinite' }} />
+            <path d="M 210 90 L 390 90" stroke="#2C6975" strokeWidth="2.5" strokeDasharray="8 6" style={{ animation: 'dash 15s linear infinite' }} />
             
-            <rect x="390" y="45" width="180" height="90" rx="16" fill="var(--card-bg)" stroke="#D9822B" strokeWidth="2.5" />
-            <text x="480" y="80" textAnchor="middle" fill="#D9822B" fontWeight="900" fontSize="13">PC 2</text>
+            <rect x="390" y="45" width="180" height="90" rx="16" fill="var(--card-bg)" stroke="#d97706" strokeWidth="2.5" />
+            <text x="480" y="80" textAnchor="middle" fill="#d97706" fontWeight="900" fontSize="13">PC 2</text>
             <text x="480" y="105" textAnchor="middle" fill="var(--text-muted)" fontWeight="700" fontSize="10.5">AI + Backend</text>
             
-            <path d="M 570 90 L 750 90" stroke="#0047AB" strokeWidth="2.5" strokeDasharray="8 6" style={{ animation: 'dash 15s linear infinite' }} />
+            <path d="M 570 90 L 750 90" stroke="#2C6975" strokeWidth="2.5" strokeDasharray="8 6" style={{ animation: 'dash 15s linear infinite' }} />
             
-            <rect x="750" y="45" width="180" height="90" rx="16" fill="var(--card-bg)" stroke="#0047AB" strokeWidth="2.5" />
-            <text x="840" y="80" textAnchor="middle" fill="#0047AB" fontWeight="900" fontSize="13">PC 3</text>
+            <rect x="750" y="45" width="180" height="90" rx="16" fill="var(--card-bg)" stroke="#2C6975" strokeWidth="2.5" />
+            <text x="840" y="80" textAnchor="middle" fill="#2C6975" fontWeight="900" fontSize="13">PC 3</text>
             <text x="840" y="105" textAnchor="middle" fill="var(--text-muted)" fontWeight="700" fontSize="10.5">Monitoring Dashboard</text>
           </svg>
           
@@ -2238,25 +2192,25 @@ function LandingPage({ onGoToLogin }: { onGoToLogin: () => void }) {
 
       {/* 6. RISK LEVELS (SAFE/WARNING/CRITICAL) & DISCLAIMER */}
       <section style={{ padding: '80px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10, position: 'relative' }}>
-        <div style={{ width: '1000px', textAlign: 'center', marginBottom: '40px' }}>
+        <div style={{ maxWidth: '1000px', width: '100%', textAlign: 'center', marginBottom: '40px' }}>
           <h2 style={{ fontSize: '32px', fontWeight: 900, color: 'var(--primary)', margin: 0 }}>Classified Risk Levels</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '13px', fontWeight: 700, margin: '8px 0 0 0' }}>AI-supported triage categories matching vital sign bounds</p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px', width: '1000px', marginBottom: '35px' }}>
-          <div className="glass-card" style={{ padding: '30px', borderLeft: '6px solid #0047AB' }}>
-            <span style={{ fontSize: '13px', fontWeight: 900, color: '#0047AB', letterSpacing: '1px' }}>🟢 SAFE</span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px', maxWidth: '1000px', width: '100%', marginBottom: '35px', boxSizing: 'border-box' }}>
+          <div className="glass-card" style={{ padding: '30px', borderLeft: '6px solid var(--primary)' }}>
+            <span style={{ fontSize: '13px', fontWeight: 900, color: 'var(--primary)', letterSpacing: '1px' }}>🟢 SAFE</span>
             <p style={{ color: 'var(--text-main)', fontSize: '12px', fontWeight: 700, marginTop: '10px', lineHeight: 1.5 }}>
               Vital signs are currently within the configured safe range.
             </p>
           </div>
-          <div className="glass-card" style={{ padding: '30px', borderLeft: '6px solid #D9822B' }}>
-            <span style={{ fontSize: '13px', fontWeight: 900, color: '#D9822B', letterSpacing: '1px' }}>🟡 WARNING</span>
+          <div className="glass-card" style={{ padding: '30px', borderLeft: '6px solid var(--accent)' }}>
+            <span style={{ fontSize: '13px', fontWeight: 900, color: 'var(--accent)', letterSpacing: '1px' }}>🟡 WARNING</span>
             <p style={{ color: 'var(--text-main)', fontSize: '12px', fontWeight: 700, marginTop: '10px', lineHeight: 1.5 }}>
               Vital signs show an abnormal pattern that requires attention.
             </p>
           </div>
-          <div className="glass-card" style={{ padding: '30px', borderLeft: '6px solid #FF5E5E' }}>
-            <span style={{ fontSize: '13px', fontWeight: 900, color: '#FF5E5E', letterSpacing: '1px' }}>🔴 CRITICAL</span>
+          <div className="glass-card" style={{ padding: '30px', borderLeft: '6px solid var(--secondary)' }}>
+            <span style={{ fontSize: '13px', fontWeight: 900, color: 'var(--secondary)', letterSpacing: '1px' }}>🔴 CRITICAL</span>
             <p style={{ color: 'var(--text-main)', fontSize: '12px', fontWeight: 700, marginTop: '10px', lineHeight: 1.5 }}>
               Vital signs indicate a potentially serious condition requiring immediate clinical attention.
             </p>
@@ -2295,17 +2249,17 @@ function LoginForm({ onLogin, onBack }: { onLogin: () => void; onBack: () => voi
     <div style={{ minHeight: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-dark)', overflow: 'hidden', position: 'relative', boxSizing: 'border-box' }}>
       <FloatingBackground />
 
-      <div className="glass-card" style={{ width: '420px', padding: '50px 40px', textAlign: 'center', border: '1px solid var(--border-color)', position: 'relative', zIndex: 10 }}>
+      <div className="glass-card" style={{ maxWidth: '420px', width: '100%', padding: '50px 40px', textAlign: 'center', border: '1px solid var(--border-color)', position: 'relative', zIndex: 10, boxSizing: 'border-box', margin: '0 20px' }}>
         {/* Back button */}
         <button 
           onClick={onBack}
-          style={{ position: 'absolute', left: '30px', top: '30px', background: 'rgba(47, 65, 86, 0.05)', border: 'none', color: 'var(--primary)', fontWeight: 900, cursor: 'pointer', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ position: 'absolute', left: '30px', top: '30px', background: 'rgba(44, 105, 117, 0.05)', border: 'none', color: 'var(--primary)', fontWeight: 900, cursor: 'pointer', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           title="Back to Landing Page"
         >
           ←
         </button>
 
-        <div style={{ fontSize: '50px', marginBottom: '20px', filter: 'drop-shadow(0 10px 15px rgba(69, 131, 147, 0.1))' }}>👶</div>
+        <div style={{ fontSize: '50px', marginBottom: '20px', filter: 'drop-shadow(0 10px 15px rgba(44, 105, 117, 0.1))' }}>👶</div>
         <h2 style={{ fontSize: '28px', fontWeight: 900, marginBottom: '4px', letterSpacing: '-0.5px', color: 'var(--primary)' }}>NAVAAYU</h2>
         <p style={{ color: 'var(--text-muted)', marginBottom: '30px', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
           Secure Monitoring Access
@@ -2339,7 +2293,7 @@ function LoginForm({ onLogin, onBack }: { onLogin: () => void; onBack: () => voi
           <button 
             type="submit" 
             className="vibrant-btn" 
-            style={{ width: '100%', height: '56px', fontSize: '14px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 20px rgba(0, 71, 171, 0.15)', border: 'none', borderRadius: '12px', cursor: 'pointer', background: '#0047AB', color: 'white', marginTop: '10px' }}
+            style={{ width: '100%', height: '56px', fontSize: '14px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 20px var(--primary-glow)', border: 'none', borderRadius: '12px', cursor: 'pointer', background: 'var(--primary)', color: 'white', marginTop: '10px' }}
           >
             LOGIN
           </button>

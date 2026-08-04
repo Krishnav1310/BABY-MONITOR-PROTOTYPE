@@ -1,26 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  /* Radiant Pastel Palette - Vibrant but Soothing */
-  --primary: #5DB7FF;
-  /* Radiant Sky Blue */
-  --secondary: #FF85A1;
-  /* Radiant Rose */
-  --accent: #FFD23F;
-  /* Radiant Sunny Yellow */
-  --mint: #4DDEBA;
-  /* Radiant Mint */
-  --lavender: #A78BFA;
-  /* Radiant Lavender */
+  /* Clean, Professional Medical Teal/Sage Palette */
+  --primary: #2C6975;            /* Deep Teal header/accents */
+  --secondary: #e11d48;          /* Rose/Red for critical status */
+  --accent: #d97706;             /* Amber/Orange for warning status */
+  --mint: #68B2A0;               /* Teal for normal status */
+  --lavender: #CDE0C9;           /* Soft Sage secondary accent */
 
-  --background: #F0F4F8;
-  /* Soft Clean Grey-Blue */
-  --surface: #FFFFFF;
-  --surface-border: #E2E8F0;
-  --text-main: #1E293B;
-  --text-muted: #64748B;
+  --background: #E0ECDE;         /* Light Sage clean backdrop */
+  --surface: #ffffff;            /* Solid flat cards */
+  --surface-border: #CDE0C9;     /* Soft Sage border lines */
+  --text-main: #2C6975;          /* Deep Teal primary text */
+  --text-muted: #68B2A0;         /* Teal muted description text */
 
-  --glow: rgba(93, 183, 255, 0.3);
+  --glow: rgba(44, 105, 117, 0.15); /* Subtle Deep Teal glow indicator */
 }
 
 * {

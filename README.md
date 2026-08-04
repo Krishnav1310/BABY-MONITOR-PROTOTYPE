@@ -15,16 +15,16 @@ A real-time AI-powered baby monitoring system that detects breathing movements a
 ### Backend (Python FastAPI)
 
 ```bash
-cd Hackthon
-python main.py
+cd backend
+python -m uvicorn main:app --port 5001 --reload
 ```
 
-Backend runs on: `http://127.0.0.1:5000`
+Backend runs on: `http://127.0.0.1:5001`
 
 ### Frontend (React + Vite)
 
 ```bash
-cd NeoNatal/frontend
+cd frontend
 npm install
 npm run dev
 ```
@@ -45,9 +45,10 @@ Frontend runs on: `http://localhost:5173`
 - OpenCV (cv2)
 - NumPy
 - Uvicorn
+- Scikit-learn / Joblib (AI Model Inference)
 
 ### Frontend
-- React 18
+- React 19
 - TypeScript
 - Vite
 - Recharts (data visualization)
@@ -56,17 +57,22 @@ Frontend runs on: `http://localhost:5173`
 ## 📁 Project Structure
 
 ```
-PROTOTYPE/
-├── Hackthon/                 # Backend
-│   ├── main.py              # FastAPI server
-│   ├── motion_detection.py  # Motion detection logic
-│   └── shared_data.py       # Dashboard data structure
-├── NeoNatal/
-│   └── frontend/            # Frontend
-│       ├── src/
-│       │   ├── App.tsx      # Main application
-│       │   └── App.css      # Styles
-│       └── package.json
+NAVAAYU/
+├── backend/                 # FastAPI server (PC2 Edge AI)
+│   ├── main.py              # FastAPI server startup
+│   ├── latest_predictions.json # Predictions local cache db
+│   ├── model.pkl            # AI Risk Random Forest classifier
+│   └── tests/               # Local test and diagnostic scripts
+├── frontend/                # React TS Dashboard (PC3 UI Client)
+│   ├── src/
+│   │   ├── App.tsx          # Main redesigned UI Dashboard
+│   │   ├── index.css        # Clean medical stylesheets
+│   │   └── main.tsx         # Mounting entrypoint
+│   └── package.json
+├── prototypes/              # Archived prototype scripts
+│   ├── sleep_positioning.py
+│   ├── motion_detection.py
+│   └── cry_detection_yamnet.py
 └── README.md
 ```
 
