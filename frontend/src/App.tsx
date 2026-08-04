@@ -1807,7 +1807,7 @@ function App() {
 
                     {/* Center */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', flex: 1, justifyContent: 'center', margin: '8px 0' }}>
-                      <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: statusColor, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '24px' }}>
+                      <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(44, 105, 117, 0.05)', border: `2.5px solid ${statusColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 900, fontSize: '24px' }}>
                         {getBedInitials(baby.id)}
                       </div>
                       <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 800 }}>Baby ID: {baby.babyId} • {baby.age}</div>
@@ -1815,28 +1815,28 @@ function App() {
 
                     {/* Micro Vitals */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%' }} onClick={e => e.stopPropagation()}>
-                      <div style={{ background: 'rgba(47, 65, 86, 0.04)', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(47, 65, 86, 0.06)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 800, letterSpacing: '0.5px' }}>HEART RATE</span>
-                        <span style={{ fontWeight: 900, color: (baby.vitals?.heartRate > 160 || baby.vitals?.heartRate < 100) ? 'var(--secondary)' : 'var(--text-main)', fontSize: '18px' }}>
-                          {baby.vitals?.heartRate || '--'}<span style={{ fontSize: '10px', color: 'var(--text-muted)', marginLeft: '2px', fontWeight: 700 }}>bpm</span>
+                      <div style={{ background: 'rgba(104, 178, 160, 0.05)', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '10px', fontWeight: 800, letterSpacing: '0.5px' }}>HEART RATE</span>
+                        <span className="technical-value" style={{ color: (baby.vitals?.heartRate > 160 || baby.vitals?.heartRate < 100) ? 'var(--secondary)' : 'var(--text-main)', fontSize: '18px' }}>
+                          {baby.vitals?.heartRate || '--'}<span style={{ fontSize: '10px', color: 'var(--text-muted)', marginLeft: '2px', fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>bpm</span>
                         </span>
                       </div>
-                      <div style={{ background: 'rgba(47, 65, 86, 0.04)', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(47, 65, 86, 0.06)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 800, letterSpacing: '0.5px' }}>OXYGEN (SpO₂)</span>
-                        <span style={{ fontWeight: 900, color: (baby.vitals?.spo2 < 95) ? 'var(--secondary)' : 'var(--text-main)', fontSize: '18px' }}>
-                          {baby.vitals?.spo2 || '--'}<span style={{ fontSize: '10px', color: 'var(--text-muted)', marginLeft: '2px', fontWeight: 700 }}>%</span>
+                      <div style={{ background: 'rgba(104, 178, 160, 0.05)', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '10px', fontWeight: 800, letterSpacing: '0.5px' }}>OXYGEN (SpO₂)</span>
+                        <span className="technical-value" style={{ color: (baby.vitals?.spo2 < 95) ? 'var(--secondary)' : 'var(--text-main)', fontSize: '18px' }}>
+                          {baby.vitals?.spo2 || '--'}<span style={{ fontSize: '10px', color: 'var(--text-muted)', marginLeft: '2px', fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>%</span>
                         </span>
                       </div>
-                      <div style={{ background: 'rgba(47, 65, 86, 0.04)', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(47, 65, 86, 0.06)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 800, letterSpacing: '0.5px' }}>TEMPERATURE</span>
-                        <span style={{ fontWeight: 900, color: (baby.vitals?.temp > 37.5 || baby.vitals?.temp < 36.5) ? 'var(--secondary)' : 'var(--text-main)', fontSize: '18px' }}>
-                          {baby.vitals?.temp || '--'}<span style={{ fontSize: '10px', color: 'var(--text-muted)', marginLeft: '2px', fontWeight: 700 }}>°C</span>
+                      <div style={{ background: 'rgba(104, 178, 160, 0.05)', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '10px', fontWeight: 800, letterSpacing: '0.5px' }}>TEMPERATURE</span>
+                        <span className="technical-value" style={{ color: (baby.vitals?.temp > 37.5 || baby.vitals?.temp < 36.5) ? 'var(--secondary)' : 'var(--text-main)', fontSize: '18px' }}>
+                          {baby.vitals?.temp || '--'}<span style={{ fontSize: '10px', color: 'var(--text-muted)', marginLeft: '2px', fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>°C</span>
                         </span>
                       </div>
-                      <div style={{ background: 'rgba(47, 65, 86, 0.04)', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(47, 65, 86, 0.06)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 800, letterSpacing: '0.5px' }}>RESPIRATORY</span>
-                        <span style={{ fontWeight: 900, color: (baby.vitals?.respRate > 50 || baby.vitals?.respRate < 25) ? 'var(--secondary)' : 'var(--text-main)', fontSize: '18px' }}>
-                          {baby.vitals?.respRate || '--'}<span style={{ fontSize: '10px', color: 'var(--text-muted)', marginLeft: '2px', fontWeight: 700 }}>/min</span>
+                      <div style={{ background: 'rgba(104, 178, 160, 0.05)', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '10px', fontWeight: 800, letterSpacing: '0.5px' }}>RESPIRATORY</span>
+                        <span className="technical-value" style={{ color: (baby.vitals?.respRate > 50 || baby.vitals?.respRate < 25) ? 'var(--secondary)' : 'var(--text-main)', fontSize: '18px' }}>
+                          {baby.vitals?.respRate || '--'}<span style={{ fontSize: '10px', color: 'var(--text-muted)', marginLeft: '2px', fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>/min</span>
                         </span>
                       </div>
                     </div>
@@ -1844,7 +1844,7 @@ function App() {
                     {/* Bottom */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', borderTop: '1px solid var(--border-color)', paddingTop: '12px', fontSize: '12px', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
                       <span>Health Condition</span>
-                      <span style={{ color: statusColor, fontSize: '18px', fontWeight: 900 }}>{baby.predictionScore}%</span>
+                      <span className="technical-value" style={{ color: statusColor, fontSize: '18px', fontWeight: 900 }}>{baby.predictionScore}%</span>
                     </div>
                   </div>
                 );
