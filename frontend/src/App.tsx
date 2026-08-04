@@ -7,6 +7,7 @@ import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tool
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
+// Trigger Vercel Build - Redesign Colors
 // Global CSS styles injection for Color Hunt warm professional neonatal ward theme
 const stylesHtml = `
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
