@@ -1224,7 +1224,7 @@ function App() {
         {/* Glowing 3D Particle Background Network */}
         <ThreeDParticleBackground />
 
-        <div style={{ height: '100vh', padding: '24px 30px', display: 'flex', flexDirection: 'column', gap: '20px', boxSizing: 'border-box', position: 'relative', zIndex: 10, overflow: 'hidden' }}>
+        <div style={{ height: '100vh', padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: '16px', boxSizing: 'border-box', position: 'relative', zIndex: 10, overflow: 'hidden' }}>
         
         {/* Dynamic Toast Notifications */}
         <div className="toast-container">
@@ -1426,20 +1426,19 @@ function App() {
           })()}
         </div>
 
-        {/* Header Row */}
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 10, paddingBottom: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="glass-card"
-              style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: 'var(--card-bg)', color: 'var(--primary)', border: '1px solid var(--border-color)', borderRadius: '14px' }}
+              style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: 'var(--card-bg)', color: 'var(--primary)', border: '1px solid var(--border-color)', borderRadius: '10px' }}
               title="Open Navaayu Control Panel"
             >
-              <Menu size={20} />
+              <Menu size={18} />
             </button>
             <div>
-              <h2 style={{ fontSize: '26px', fontWeight: 900, margin: 0, letterSpacing: '-0.5px', color: 'var(--primary)' }}>NAVAAYU</h2>
-              <p style={{ color: 'var(--text-muted)', fontWeight: 600, margin: '4px 0 0 0', fontSize: '13px' }}>Neonatal AI Monitoring System</p>
+              <h2 style={{ fontSize: '20px', fontWeight: 900, margin: 0, letterSpacing: '-0.5px', color: 'var(--primary)' }}>NAVAAYU</h2>
+              <p style={{ color: 'var(--text-muted)', fontWeight: 600, margin: '2px 0 0 0', fontSize: '11px' }}>Neonatal AI Monitoring System</p>
             </div>
           </div>
           
@@ -1531,35 +1530,35 @@ function App() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', flex: 1, position: 'relative', zIndex: 10 }}>
               
               {/* Summary Stats Row */}
-              <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
-                <div className="glass-card" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  <div style={{ width: '48px', height: '48px', background: 'rgba(69, 131, 147, 0.1)', color: 'var(--primary)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Baby size={22} /></div>
+              <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+                <div className="glass-card" style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '38px', height: '38px', background: 'rgba(69, 131, 147, 0.1)', color: 'var(--primary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Baby size={18} /></div>
                   <div>
-                    <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--primary)' }}>{liveBabies.length}</div>
+                    <div style={{ fontSize: '20px', fontWeight: 900, color: 'var(--primary)' }}>{liveBabies.length}</div>
                     <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)' }}>Total Beds Monitored</div>
                   </div>
                 </div>
                 
-                <div className="glass-card" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '20px', border: (data?.totalModerate || 0) > 0 ? '1.5px solid var(--accent)' : '1px solid var(--border-color)' }}>
-                  <div style={{ width: '48px', height: '48px', background: 'rgba(217, 130, 43, 0.1)', color: 'var(--accent)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Heart size={22} /></div>
+                <div className="glass-card" style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '12px', border: (data?.totalModerate || 0) > 0 ? '1.5px solid var(--accent)' : '1px solid var(--border-color)' }}>
+                  <div style={{ width: '38px', height: '38px', background: 'rgba(217, 130, 43, 0.1)', color: 'var(--accent)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Heart size={18} /></div>
                   <div>
-                    <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--accent)' }}>{data?.totalModerate || 0}</div>
+                    <div style={{ fontSize: '20px', fontWeight: 900, color: 'var(--accent)' }}>{data?.totalModerate || 0}</div>
                     <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)' }}>Moderate Cases</div>
                   </div>
                 </div>
 
-                <div className="glass-card" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '20px', border: (data?.totalCritical || 0) > 0 ? '1.5px solid var(--secondary)' : '1px solid var(--border-color)' }}>
-                  <div style={{ width: '48px', height: '48px', background: 'rgba(255, 94, 94, 0.1)', color: 'var(--secondary)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Bell size={22} /></div>
+                <div className="glass-card" style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '12px', border: (data?.totalCritical || 0) > 0 ? '1.5px solid var(--secondary)' : '1px solid var(--border-color)' }}>
+                  <div style={{ width: '38px', height: '38px', background: 'rgba(255, 94, 94, 0.1)', color: 'var(--secondary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Bell size={18} /></div>
                   <div>
-                    <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--secondary)' }}>{data?.totalCritical || 0}</div>
+                    <div style={{ fontSize: '20px', fontWeight: 900, color: 'var(--secondary)' }}>{data?.totalCritical || 0}</div>
                     <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)' }}>Critical Cases</div>
                   </div>
                 </div>
 
-                <div className="glass-card" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  <div style={{ width: '48px', height: '48px', background: 'rgba(0, 71, 171, 0.1)', color: 'var(--mint)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Monitor size={22} /></div>
+                <div className="glass-card" style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '38px', height: '38px', background: 'rgba(0, 71, 171, 0.1)', color: 'var(--mint)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Monitor size={18} /></div>
                   <div>
-                    <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--mint)' }}>{isDemoMode ? "99%" : isBackendOnline ? "98%" : "80%"}</div>
+                    <div style={{ fontSize: '20px', fontWeight: 900, color: 'var(--mint)' }}>{isDemoMode ? "99%" : isBackendOnline ? "98%" : "80%"}</div>
                     <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)' }}>System Health</div>
                   </div>
                 </div>
@@ -2116,8 +2115,7 @@ function App() {
 
         </main>
 
-        {/* Medical Disclaimer */}
-        <footer style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '11px', fontWeight: 700, borderTop: '1px solid var(--border-color)', paddingTop: '20px', marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <footer style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '10px', fontWeight: 700, borderTop: '1px solid var(--border-color)', paddingTop: '8px', marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <div>Disclaimer: NAVAAYU is an AI-assisted neonatal monitoring prototype and is not a substitute for professional medical judgment, clinical diagnosis, or medical decision thresholds.</div>
           <div style={{ color: 'var(--primary)', opacity: 0.8 }}>© 2026 @AKESISPROTOCOL. All rights reserved.</div>
         </footer>
