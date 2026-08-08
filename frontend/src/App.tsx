@@ -614,33 +614,38 @@ function ThreeDParticleBackground() {
   return <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }} />;
 }
 
-const CLINICAL_HISTORY_CONTEXT: Record<string, { maternalHistory: string, deliveryType: string, previousEvents: string, previousMonitoring: string }> = {
+const CLINICAL_HISTORY_CONTEXT: Record<string, { maternalHistory: string, maternalFever: 'Yes' | 'No' | 'Not recorded' | string, deliveryType: string, previousEvents: string, previousMonitoring: string }> = {
   "NB-2026-001": {
-    maternalHistory: "No recorded fever; Gestational diabetes controlled",
+    maternalHistory: "Gestational diabetes controlled",
+    maternalFever: "No",
     deliveryType: "C-section (38 weeks)",
     previousEvents: "No previous abnormal events",
     previousMonitoring: "Stable since admission"
   },
   "NB-2026-002": {
-    maternalHistory: "No recorded fever; Normal prenatal screenings",
+    maternalHistory: "Normal prenatal screenings",
+    maternalFever: "No",
     deliveryType: "Normal Vaginal Delivery (37 weeks)",
     previousEvents: "Mild transient tachypnea resolved within 6h",
     previousMonitoring: "Generally stable"
   },
   "NB-2026-003": {
-    maternalHistory: "Recorded temp 38.2°C intrapartum; Suspected chorioamnionitis",
+    maternalHistory: "Suspected chorioamnionitis",
+    maternalFever: "Yes (Intrapartum temp 38.2°C)",
     deliveryType: "Emergency C-section (39 weeks)",
     previousEvents: "Post-natal heart rate instability",
     previousMonitoring: "Attention required - closely monitoring temperature"
   },
   "NB-2026-004": {
-    maternalHistory: "Chronic hypertension; No fever history",
+    maternalHistory: "Chronic hypertension",
+    maternalFever: "Not recorded",
     deliveryType: "C-section (38 weeks)",
     previousEvents: "No abnormal events",
     previousMonitoring: "Stable"
   },
   "NB-2026-005": {
-    maternalHistory: "No fever; Pre-eclampsia mild",
+    maternalHistory: "Pre-eclampsia mild",
+    maternalFever: "No",
     deliveryType: "Normal Vaginal Delivery (36 weeks)",
     previousEvents: "Apgar scores 8/9",
     previousMonitoring: "Stable, mild preterm tracking"
@@ -2002,15 +2007,15 @@ function App() {
 
                       {/* Background context clinical history */}
                       {(() => {
-                        const history = CLINICAL_HISTORY_CONTEXT[baby.id] || { maternalHistory: '', deliveryType: '', previousEvents: '', previousMonitoring: '' };
+                        const history = CLINICAL_HISTORY_CONTEXT[baby.id] || { maternalHistory: '', maternalFever: 'Not recorded', deliveryType: '', previousEvents: '', previousMonitoring: '' };
                         return (
-                          <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>CLINICAL HISTORY (Historical / Static Context)</span>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--text-main)', opacity: 0.85 }}>
-                              <div><strong>Maternal:</strong> {history.maternalHistory}</div>
-                              <div><strong>Delivery:</strong> {history.deliveryType}</div>
+                          <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <span style={{ fontSize: '9px', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>CLINICAL HISTORY (Historical / Static Context)</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '10px', color: 'var(--text-muted)', opacity: 0.8 }}>
+                              <div><strong>Maternal Context:</strong> {history.maternalHistory} (Fever: {history.maternalFever})</div>
+                              <div><strong>Delivery Type:</strong> {history.deliveryType}</div>
                               <div><strong>Prev Events:</strong> {history.previousEvents}</div>
-                              <div><strong>Prev Notes:</strong> {history.previousMonitoring}</div>
+                              <div><strong>Monitoring Notes:</strong> {history.previousMonitoring}</div>
                             </div>
                           </div>
                         );
