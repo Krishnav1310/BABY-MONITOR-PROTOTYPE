@@ -768,11 +768,11 @@ function App() {
 
   const getParameterTrend = (babyId: string, paramKey: 'heartRate' | 'spo2' | 'temp' | 'respRate', currentValue: number) => {
     const history = babyHistories[babyId];
-    if (!history || history.length < 2) return '→ Stable';
+    if (!history || history.length < 2) return 'Trend unavailable';
     const prevEntry = history[history.length - 2] as any;
-    if (!prevEntry) return '→ Stable';
+    if (!prevEntry) return 'Trend unavailable';
     const prevValue = prevEntry[paramKey];
-    if (prevValue === undefined) return '→ Stable';
+    if (prevValue === undefined) return 'Trend unavailable';
     if (currentValue > prevValue) return '↑ Increasing';
     if (currentValue < prevValue) return '↓ Decreasing';
     return '→ Stable';
@@ -1955,7 +1955,7 @@ function App() {
                               ))}
                             </ul>
                           ) : (
-                            <span style={{ opacity: 0.6, fontSize: '10px' }}>No active abnormal vitals or warning factors.</span>
+                            <span style={{ opacity: 0.6, fontSize: '10px' }}>Reason data unavailable</span>
                           )}
                         </div>
                       </div>
