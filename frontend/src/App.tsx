@@ -1921,116 +1921,129 @@ function App() {
                     </div>
 
                     {/* EXPANDED SECTION DETAILS IN-PLACE */}
-                    {expandedBabyId === baby.id && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', borderTop: '1px solid var(--border-color)', paddingTop: '14px', marginTop: '4px' }} onClick={e => e.stopPropagation()}>
-                        
-                        {/* Prediction reasoning */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>CURRENT DIAGNOSTIC PREDICTION</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontSize: '10px', fontWeight: 900, color: statusColor, background: 'rgba(255,255,255,0.06)', border: `1px solid ${statusColor}`, padding: '4px 10px', borderRadius: '6px' }}>
-                              {baby.status === 'CRITICAL' ? '🚨 CRITICAL RISK' : baby.status === 'MODERATE' ? '⚠️ ATTENTION REQUIRED' : '✅ SAFE / STABLE'}
+                    {/* EXPANDED SECTION DETAILS IN-PLACE */}
+                    <div 
+                      onClick={e => e.stopPropagation()}
+                      style={{ 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        gap: '14px', 
+                        maxHeight: expandedBabyId === baby.id ? '600px' : '0px', 
+                        opacity: expandedBabyId === baby.id ? 1 : 0, 
+                        overflow: 'hidden', 
+                        transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)', 
+                        borderTop: expandedBabyId === baby.id ? '1px solid var(--border-color)' : '0px solid transparent', 
+                        paddingTop: expandedBabyId === baby.id ? '14px' : '0px', 
+                        marginTop: expandedBabyId === baby.id ? '4px' : '0px' 
+                      }}
+                    >
+                      
+                      {/* Prediction reasoning */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>CURRENT DIAGNOSTIC PREDICTION</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '10px', fontWeight: 900, color: statusColor, background: 'rgba(255,255,255,0.06)', border: `1px solid ${statusColor}`, padding: '4px 10px', borderRadius: '6px' }}>
+                            {baby.status === 'CRITICAL' ? '🚨 CRITICAL RISK' : baby.status === 'MODERATE' ? '⚠️ ATTENTION REQUIRED' : '✅ SAFE / STABLE'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '2px' }}>
+                          <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Contributing Factors:</span>
+                          {baby.reasons && baby.reasons.length > 0 ? (
+                            <ul style={{ margin: 0, paddingLeft: '16px', listStyleType: 'disc', color: 'var(--text-main)' }}>
+                              {baby.reasons.map((r: string, idx: number) => (
+                                <li key={idx} style={{ margin: '2px 0', fontWeight: 700 }}>{r}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <span style={{ opacity: 0.6, fontSize: '10px' }}>No active abnormal vitals or warning factors.</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Vitals Trends list */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>LIVE TELEMETRY TRENDS</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, borderBottom: '1px solid var(--border-color)', paddingBottom: '4px', color: 'var(--text-muted)', fontSize: '9px' }}>
+                            <span>PARAMETER</span>
+                            <span>VALUE</span>
+                            <span>TREND DIRECTION</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 700 }}>Heart Rate</span>
+                            <span className="technical-value" style={{ fontWeight: 700 }}>{baby.vitals?.heartRate || '--'} bpm</span>
+                            <span style={{ fontWeight: 800, color: getParameterTrend(baby.id, 'heartRate', baby.vitals?.heartRate).includes('↑') ? 'var(--secondary)' : getParameterTrend(baby.id, 'heartRate', baby.vitals?.heartRate).includes('↓') ? 'var(--primary)' : 'var(--mint)' }}>
+                              {getParameterTrend(baby.id, 'heartRate', baby.vitals?.heartRate)}
                             </span>
                           </div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '2px' }}>
-                            <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>Contributing Factors:</span>
-                            {baby.reasons && baby.reasons.length > 0 ? (
-                              <ul style={{ margin: 0, paddingLeft: '16px', listStyleType: 'disc', color: 'var(--text-main)' }}>
-                                {baby.reasons.map((r: string, idx: number) => (
-                                  <li key={idx} style={{ margin: '2px 0', fontWeight: 700 }}>{r}</li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <span style={{ opacity: 0.6, fontSize: '10px' }}>No active abnormal vitals or warning factors.</span>
-                            )}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 700 }}>Oxygen (SpO₂)</span>
+                            <span className="technical-value" style={{ fontWeight: 700 }}>{baby.vitals?.spo2 || '--'}%</span>
+                            <span style={{ fontWeight: 800, color: getParameterTrend(baby.id, 'spo2', baby.vitals?.spo2).includes('↓') ? 'var(--secondary)' : 'var(--mint)' }}>
+                              {getParameterTrend(baby.id, 'spo2', baby.vitals?.spo2)}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 700 }}>Temperature</span>
+                            <span className="technical-value" style={{ fontWeight: 700 }}>{baby.vitals?.temp || '--'} °C</span>
+                            <span style={{ fontWeight: 800, color: getParameterTrend(baby.id, 'temp', baby.vitals?.temp).includes('Stable') ? 'var(--mint)' : 'var(--secondary)' }}>
+                              {getParameterTrend(baby.id, 'temp', baby.vitals?.temp)}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 700 }}>Respiratory</span>
+                            <span className="technical-value" style={{ fontWeight: 700 }}>{baby.vitals?.respRate || '--'} /min</span>
+                            <span style={{ fontWeight: 800, color: getParameterTrend(baby.id, 'respRate', baby.vitals?.respRate).includes('↑') ? 'var(--secondary)' : 'var(--mint)' }}>
+                              {getParameterTrend(baby.id, 'respRate', baby.vitals?.respRate)}
+                            </span>
                           </div>
                         </div>
-
-                        {/* Vitals Trends list */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>LIVE TELEMETRY TRENDS</span>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, borderBottom: '1px solid var(--border-color)', paddingBottom: '4px', color: 'var(--text-muted)', fontSize: '9px' }}>
-                              <span>PARAMETER</span>
-                              <span>VALUE</span>
-                              <span>TREND DIRECTION</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontWeight: 700 }}>Heart Rate</span>
-                              <span className="technical-value" style={{ fontWeight: 700 }}>{baby.vitals?.heartRate || '--'} bpm</span>
-                              <span style={{ fontWeight: 800, color: getParameterTrend(baby.id, 'heartRate', baby.vitals?.heartRate).includes('↑') ? 'var(--secondary)' : getParameterTrend(baby.id, 'heartRate', baby.vitals?.heartRate).includes('↓') ? 'var(--primary)' : 'var(--mint)' }}>
-                                {getParameterTrend(baby.id, 'heartRate', baby.vitals?.heartRate)}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontWeight: 700 }}>Oxygen (SpO₂)</span>
-                              <span className="technical-value" style={{ fontWeight: 700 }}>{baby.vitals?.spo2 || '--'}%</span>
-                              <span style={{ fontWeight: 800, color: getParameterTrend(baby.id, 'spo2', baby.vitals?.spo2).includes('↓') ? 'var(--secondary)' : 'var(--mint)' }}>
-                                {getParameterTrend(baby.id, 'spo2', baby.vitals?.spo2)}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontWeight: 700 }}>Temperature</span>
-                              <span className="technical-value" style={{ fontWeight: 700 }}>{baby.vitals?.temp || '--'} °C</span>
-                              <span style={{ fontWeight: 800, color: getParameterTrend(baby.id, 'temp', baby.vitals?.temp).includes('Stable') ? 'var(--mint)' : 'var(--secondary)' }}>
-                                {getParameterTrend(baby.id, 'temp', baby.vitals?.temp)}
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontWeight: 700 }}>Respiratory</span>
-                              <span className="technical-value" style={{ fontWeight: 700 }}>{baby.vitals?.respRate || '--'} /min</span>
-                              <span style={{ fontWeight: 800, color: getParameterTrend(baby.id, 'respRate', baby.vitals?.respRate).includes('↑') ? 'var(--secondary)' : 'var(--mint)' }}>
-                                {getParameterTrend(baby.id, 'respRate', baby.vitals?.respRate)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Background context clinical history */}
-                        {(() => {
-                          const history = CLINICAL_HISTORY_CONTEXT[baby.id] || { maternalHistory: '', deliveryType: '', previousEvents: '', previousMonitoring: '' };
-                          return (
-                            <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                              <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>CLINICAL HISTORY (Historical / Static Context)</span>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--text-main)', opacity: 0.85 }}>
-                                <div><strong>Maternal:</strong> {history.maternalHistory}</div>
-                                <div><strong>Delivery:</strong> {history.deliveryType}</div>
-                                <div><strong>Prev Events:</strong> {history.previousEvents}</div>
-                                <div><strong>Prev Notes:</strong> {history.previousMonitoring}</div>
-                              </div>
-                            </div>
-                          );
-                        })()}
-
-                        {/* Open Focused Telemetry Explicit CTA Button */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedBabyId(baby.id);
-                            setActiveTab('Focused Telemetry');
-                          }}
-                          className="sidebar-item active"
-                          style={{ 
-                            marginTop: '6px', 
-                            border: 'none', 
-                            borderRadius: '8px', 
-                            cursor: 'pointer', 
-                            padding: '10px 14px', 
-                            fontSize: '11px', 
-                            fontWeight: 900, 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center', 
-                            gap: '6px',
-                            background: 'var(--primary)',
-                            color: 'white',
-                            boxShadow: '0 4px 10px rgba(44, 105, 117, 0.15)'
-                          }}
-                        >
-                          Focus Bed Telemetry
-                        </button>
                       </div>
-                    )}
+
+                      {/* Background context clinical history */}
+                      {(() => {
+                        const history = CLINICAL_HISTORY_CONTEXT[baby.id] || { maternalHistory: '', deliveryType: '', previousEvents: '', previousMonitoring: '' };
+                        return (
+                          <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>CLINICAL HISTORY (Historical / Static Context)</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--text-main)', opacity: 0.85 }}>
+                              <div><strong>Maternal:</strong> {history.maternalHistory}</div>
+                              <div><strong>Delivery:</strong> {history.deliveryType}</div>
+                              <div><strong>Prev Events:</strong> {history.previousEvents}</div>
+                              <div><strong>Prev Notes:</strong> {history.previousMonitoring}</div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Open Focused Telemetry Explicit CTA Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedBabyId(baby.id);
+                          setActiveTab('Focused Telemetry');
+                        }}
+                        className="sidebar-item active"
+                        style={{ 
+                          marginTop: '6px', 
+                          border: 'none', 
+                          borderRadius: '8px', 
+                          cursor: 'pointer', 
+                          padding: '10px 14px', 
+                          fontSize: '11px', 
+                          fontWeight: 900, 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          gap: '6px',
+                          background: 'var(--primary)',
+                          color: 'white',
+                          boxShadow: '0 4px 10px rgba(44, 105, 117, 0.15)'
+                        }}
+                      >
+                        Focus Bed Telemetry
+                      </button>
+                    </div>
                   </div>
                 );
               })}
