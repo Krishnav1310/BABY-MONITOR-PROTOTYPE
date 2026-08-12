@@ -1166,7 +1166,48 @@ function App() {
       predictionScore: 97
     }
   ]);
-  const [babyHistories, setBabyHistories] = useState<Record<string, { time: string; heartRate: number; spo2: number; temp?: number; respRate?: number; bp?: number }[]>>({});
+  const generateInitialHistories = () => {
+    const histories: Record<string, { time: string; heartRate: number; spo2: number; temp: number; respRate: number; bp: number }[]> = {};
+    const babyIds = ["NB-2026-001", "NB-2026-002", "NB-2026-003", "NB-2026-004", "NB-2026-005"];
+    
+    const baseVitalsList: Record<string, any> = {
+      "NB-2026-001": { heartRate: 140, spo2: 97, temp: 36.8, respRate: 40, bp: 41 },
+      "NB-2026-002": { heartRate: 138, spo2: 96, temp: 36.6, respRate: 36, bp: 40 },
+      "NB-2026-003": { heartRate: 152, spo2: 93, temp: 37.2, respRate: 44, bp: 32 },
+      "NB-2026-004": { heartRate: 132, spo2: 98, temp: 36.9, respRate: 38, bp: 41 },
+      "NB-2026-005": { heartRate: 148, spo2: 95, temp: 37.1, respRate: 46, bp: 39 }
+    };
+
+    babyIds.forEach(id => {
+      const base = baseVitalsList[id];
+      const list = [];
+      const now = Date.now();
+      for (let i = 19; i >= 0; i--) {
+        const timeStr = new Date(now - i * 15000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const seed = parseInt(id.replace(/\D/g, '')) || 1;
+        const timeOffset = (now - i * 15000) / 4000 + seed;
+        
+        const hr = Math.round(base.heartRate + Math.sin(timeOffset) * 4);
+        const spo2 = Math.round(base.spo2 + Math.sin(timeOffset) * 0.8);
+        const temp = parseFloat((base.temp + Math.sin(timeOffset) * 0.08).toFixed(1));
+        const resp = Math.round(base.respRate + Math.sin(timeOffset) * 1.5);
+        const bp = Math.round(base.bp + Math.sin(timeOffset) * 1);
+
+        list.push({
+          time: timeStr,
+          heartRate: hr,
+          spo2,
+          temp,
+          respRate: resp,
+          bp
+        });
+      }
+      histories[id] = list;
+    });
+    return histories;
+  };
+
+  const [babyHistories, setBabyHistories] = useState<Record<string, { time: string; heartRate: number; spo2: number; temp?: number; respRate?: number; bp?: number }[]>>(generateInitialHistories());
 
   const prevStatusesRef = useRef<Record<string, string>>({});
   const notifiedWarningRef = useRef<Record<string, boolean>>({});
@@ -2048,6 +2089,20 @@ function App() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Reasons for Attention (Shifted below Blood Pressure) */}
+                    {baby.reasons && baby.reasons.length > 0 && (
+                      <div style={{ padding: '14px', background: isCritical ? 'rgba(217, 83, 79, 0.04)' : 'rgba(197, 152, 40, 0.04)', border: `1px solid ${isCritical ? 'var(--secondary)' : 'var(--accent)'}`, borderRadius: '14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 900, color: isCritical ? 'var(--secondary)' : 'var(--accent)', letterSpacing: '0.5px' }}>
+                          {isCritical ? 'IMMEDIATE ATTENTION REQUIRED' : 'REASONS FOR ATTENTION'}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          {baby.reasons.map((r: string, idx: number) => (
+                            <div key={idx} style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-main)' }}>• {cleanReasonString(r)}</div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Right Column: AI Insights, Clinical Actions & ECG Waveform */}
@@ -2060,20 +2115,6 @@ function App() {
                       
                       return (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                          {/* Reasons for Attention */}
-                          {baby.reasons && baby.reasons.length > 0 && (
-                            <div style={{ padding: '14px', background: isCritical ? 'rgba(217, 83, 79, 0.04)' : 'rgba(197, 152, 40, 0.04)', border: `1px solid ${isCritical ? 'var(--secondary)' : 'var(--accent)'}`, borderRadius: '14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                              <div style={{ fontSize: '10px', fontWeight: 900, color: isCritical ? 'var(--secondary)' : 'var(--accent)', letterSpacing: '0.5px' }}>
-                                {isCritical ? 'IMMEDIATE ATTENTION REQUIRED' : 'REASONS FOR ATTENTION'}
-                              </div>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                {baby.reasons.map((r: string, idx: number) => (
-                                  <div key={idx} style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-main)' }}>• {cleanReasonString(r)}</div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
                           {/* Possible Conditions */}
                           <div style={{ padding: '14px', background: 'rgba(47, 65, 86, 0.03)', border: '1px solid var(--border-color)', borderRadius: '14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--primary)', letterSpacing: '0.5px' }}>
