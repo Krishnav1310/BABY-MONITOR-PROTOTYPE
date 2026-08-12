@@ -1266,10 +1266,6 @@ function App() {
     const timer = setInterval(() => {
       setLiveBabies(prev => {
         return prev.map((baby: any) => {
-          if (baby.isLiveSource) {
-            // Keep exact live vitals from PC2, no false fluctuations!
-            return baby;
-          }
           const base = baby.baseVitals || baby.vitals;
           
           // Add micro-noise (+/- 1 or 2) around the baseline polled from PC2
