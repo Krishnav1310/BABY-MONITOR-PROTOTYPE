@@ -91,6 +91,8 @@ class BabyData(BaseModel):
     apgar_score: float
     immunizations_done: int
     reflexes_normal: int
+    systolic_bp: float = 75.0
+    diastolic_bp: float = 45.0
 
 
 # ============================================================
@@ -239,6 +241,76 @@ def get_vital_reasons(baby):
 
 
 # ============================================================
+# CLINICAL GUIDANCE ENGINE
+# ============================================================
+
+def get_clinical_guidance(baby, status, reasons):
+
+    possible_conditions = []
+    recommended_actions = []
+
+    if status == "NORMAL":
+        return [], []
+
+    has_resp_issue = False
+    has_temp_high = False
+    has_temp_low = False
+    has_cardio_issue = False
+    has_apgar_issue = False
+    has_weight_issue = False
+    has_reflexes_issue = False
+
+    for r in reasons:
+        r_lower = r.lower()
+        if "respiratory" in r_lower or "oxygen" in r_lower or "spo2" in r_lower or "spò" in r_lower:
+            has_resp_issue = True
+        if "temperature" in r_lower:
+            if "⬆" in r or "high" in r_lower:
+                has_temp_high = True
+            else:
+                has_temp_low = True
+        if "heart" in r_lower or "bp" in r_lower or "blood pressure" in r_lower:
+            has_cardio_issue = True
+        if "apgar" in r_lower:
+            has_apgar_issue = True
+        if "weight" in r_lower:
+            has_weight_issue = True
+        if "reflexes" in r_lower:
+            has_reflexes_issue = True
+
+    if has_resp_issue:
+        possible_conditions.append("Possible respiratory compromise")
+    if has_temp_high:
+        possible_conditions.append("Possible fever / hyperthermia")
+    if has_temp_low:
+        possible_conditions.append("Possible hypothermia / cold stress")
+    if has_cardio_issue:
+        possible_conditions.append("Cardiovascular distress / perfusion risk")
+    if has_apgar_issue:
+        possible_conditions.append("Neonatal depression / distress")
+    if has_weight_issue:
+        possible_conditions.append("Low birth weight / nutritional risk")
+    if has_reflexes_issue:
+        possible_conditions.append("Neurological depression")
+
+    if not possible_conditions:
+        if status == "MODERATE":
+            possible_conditions.append("Subtle physiological trend deviation")
+        else:
+            possible_conditions.append("Significant vital deviation")
+
+    if status == "MODERATE":
+        recommended_actions.append("Repeat and monitor abnormal vital signs.")
+        recommended_actions.append("Seek clinical assessment if abnormalities persist.")
+    elif status == "CRITICAL":
+        recommended_actions.append("Immediate clinical intervention required.")
+        recommended_actions.append("Notify neonatologist on duty immediately.")
+        recommended_actions.append("Verify sensor placement and double check vitals manually.")
+
+    return possible_conditions, recommended_actions
+
+
+# ============================================================
 # PROCESS ONE BABY
 # ============================================================
 
@@ -337,7 +409,19 @@ def process_one_baby(baby: BabyData):
     # RESULT
     # --------------------------------------------------------
 
+    possible_conditions, recommended_actions = get_clinical_guidance(
+        baby_dict,
+        status,
+        reasons
+    )
+
+
     result = {
+        "conditions": possible_conditions,
+
+        "actions": recommended_actions,
+
+
 
         "baby_id": baby.baby_id,
 
@@ -357,7 +441,16 @@ def process_one_baby(baby: BabyData):
                 baby.temperature_c,
 
             "respiratory_rate_bpm":
-                baby.respiratory_rate_bpm
+                baby.respiratory_rate_bpm,
+
+            "systolic_bp":
+                baby.systolic_bp,
+
+            "diastolic_bp":
+                baby.diastolic_bp,
+
+            "bp":
+                round(baby.diastolic_bp + (baby.systolic_bp - baby.diastolic_bp) / 3)
 
         },
 
