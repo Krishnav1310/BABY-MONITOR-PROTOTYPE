@@ -69,7 +69,9 @@ const getClinicalGuidance = (status: string, reasons: string[]) => {
   return { conditions, actions };
 };
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? "https://neonatal-pc2-api-zh5h.onrender.com"
+  : "/api";
 
 // Trigger Vercel Build - Redesign Colors
 // Global CSS styles injection for Color Hunt warm professional neonatal ward theme
