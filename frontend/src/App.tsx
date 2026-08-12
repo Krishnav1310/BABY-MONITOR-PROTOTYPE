@@ -1053,7 +1053,7 @@ function BedsideWaveform({ heartRate, statusColor }: { heartRate: number; status
     <div style={{ background: 'rgba(0, 0, 0, 0.02)', padding: '14px', borderRadius: '14px', border: '1px solid var(--border-color)', height: '90px', display: 'flex', flexDirection: 'column', marginTop: 'auto' }}>
       <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontWeight: 800, marginBottom: '4px' }}>Live Bedside Waveform (ECG Beating Rhythm)</div>
       <div style={{ height: '54px', width: '100%' }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={54}>
           <AreaChart data={data}>
             <Area type="monotone" dataKey="y" stroke={statusColor} fill="transparent" strokeWidth={2} isAnimationActive={false} />
           </AreaChart>
@@ -2403,7 +2403,7 @@ function App() {
                       <p style={{ margin: '4px 0 0 0', color: 'var(--text-muted)', fontSize: '11px', fontWeight: 700 }}>Continuous vital history charts for patient {activeBaby.babyId}</p>
                     </div>
                     <div style={{ height: '260px', width: '100%' }}>
-                      <ResponsiveContainer width="100%" height="100%">
+                      <ResponsiveContainer width="100%" height={260}>
                         <AreaChart data={babyHistories[activeBaby.id] || []}>
                           <defs>
                             <linearGradient id="colorHR" x1="0" y1="0" x2="0" y2="1">
@@ -2911,7 +2911,7 @@ function App() {
                   <Heart size={16} /> Heart Rate Trend (bpm)
                 </div>
                 <div style={{ flex: 1, minHeight: '260px' }}>
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height={260}>
                     <AreaChart data={babyHistories[selectedBabyId] || []}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
                       <XAxis dataKey="time" hide />
@@ -2929,7 +2929,7 @@ function App() {
                   <Zap size={16} /> Oxygen Saturation Trend (SpO₂)
                 </div>
                 <div style={{ flex: 1, minHeight: '260px' }}>
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height={260}>
                     <AreaChart data={babyHistories[selectedBabyId] || []}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
                       <XAxis dataKey="time" hide />
