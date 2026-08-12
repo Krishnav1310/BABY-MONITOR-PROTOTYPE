@@ -2518,7 +2518,7 @@ function App() {
                         </thead>
                         <tbody>
                           {(() => {
-                            const historyLog = [...(babyHistories[activeBaby.id] || [])].reverse();
+                            const historyLog: any[] = []; // Cleared as requested
                             if (historyLog.length === 0) {
                               return (
                                 <tr>
