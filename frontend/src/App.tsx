@@ -1303,11 +1303,15 @@ function App() {
     return `${hrs}:${mins}:${secs}`;
   };
 
-  // 1. Data Polling from PC2 Edge AI (1 second polling interval for true real-time updates)
+  // 1. Data Polling from PC2 Edge AI (sequential polling for true real-time updates)
   useEffect(() => {
     if (!isAuthenticated) return;
 
+    let active = true;
+    let timerId: any = null;
+
     const poll = async () => {
+      if (!active) return;
       let mappedBabies: any[] = [];
 
       if (isDemoMode) {
@@ -1746,11 +1750,17 @@ function App() {
           }
         });
       }
+
+      if (active) {
+        timerId = setTimeout(poll, 1500); // Schedule next poll 1.5 seconds after response is received
+      }
     };
 
-    const interval = setInterval(poll, 1000); // Poll every 1 second for live real-time response
     poll(); // Initial poll
-    return () => clearInterval(interval);
+    return () => {
+      active = false;
+      if (timerId) clearTimeout(timerId);
+    };
   }, [isAuthenticated, selectedBabyId]);
 
   // Apnea Sound Siren Logic
