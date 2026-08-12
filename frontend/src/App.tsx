@@ -2676,11 +2676,6 @@ function App() {
 
                       </div>
 
-                    {/* Collapsed health condition summary */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', borderTop: '1px solid var(--border-color)', paddingTop: '10px', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
-                      <span>Health Condition</span>
-                      <span className="technical-value" style={{ color: statusColor, fontSize: '16px', fontWeight: 900 }}>{baby.predictionScore}%</span>
-                    </div>
 
                     {/* EXPANDED SECTION DETAILS IN-PLACE */}
                     {/* EXPANDED SECTION DETAILS IN-PLACE */}
