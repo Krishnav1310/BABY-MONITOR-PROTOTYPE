@@ -5,5 +5,4 @@ numpy
 scikit-learn
 joblib
 pydantic
-opencv-python-headless
-sounddevice
+opencv-python-headless
